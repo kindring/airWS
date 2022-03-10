@@ -1,0 +1,8 @@
+{
+    "host": "localhost",
+    "port": "3306",
+    "user": "air",
+    "password": "airFly",
+    "connectionLimit": "100",
+    "database": "db_air"
+}
