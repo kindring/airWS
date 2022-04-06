@@ -8,4 +8,8 @@ module.exports = {
     userFreezeState:2,
     // 用户注销状态
     userStopState: 3,
+    // 国内航班
+    routeType_domestic:1,
+    // 国际航班
+    routeType_international:2,
 }
