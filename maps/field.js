@@ -12,4 +12,8 @@ module.exports = {
     routeType_domestic:1,
     // 国际航班
     routeType_international:2,
+    // 国内城市
+    cityType_domestic:1,
+    // 国际城市
+    cityType_international:2,
 }
