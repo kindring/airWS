@@ -56,3 +56,10 @@ function updateCity(cityId,cityType,cityName){
     values.push(cityId);
     return mysql.pq(sql,values);
 }
+
+
+module.exports = {
+    updateCity,
+    addArea,
+    searchAreas,
+}
