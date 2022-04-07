@@ -14,21 +14,6 @@ const rcodeMap = require('../maps/rcodeMap');
 // 错误代码
 const failedRcode = rcodeMap.notParam;
 
-// 是否为必须 required
-// let optionsTemplate = {
-//     body: {
-//         owner: {
-//             required: true,
-//             default: 'admin'
-//         }, //检查条件
-//         passwd: {
-//             required: true
-//         },
-//     },
-//     get: {
-
-//     }
-// }
 
 function paramsCheck(ruleParams) {
     // 确定该接口需要检查什么参数

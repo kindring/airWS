@@ -1,7 +1,5 @@
-const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
-const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const ejs = require('ejs');
 const bodyParser = require('body-parser');
@@ -9,7 +7,9 @@ const bodyParser = require('body-parser');
 
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
-
+const citysRouter = require('./routes/citys');
+const adminRouter = require('./routes/admin');
+const captcha = require('./routes/captcha');
 const app = express();
 
 const serverConfig = require('./configs/server.json');
@@ -28,7 +28,7 @@ app.use(
       secret: 'air',
       name: 'session', //这里的name值得是cookie的name，默认cookie的name是：connect.sid
       cookie: { maxAge: 1800000 }, //过期时间半小时
-      keys: ['owner', 'captcha'], // 用户登陆信息,验证码字段
+      keys: ['owner','admin', 'captcha'], // 用户登陆信息,验证码字段
       resave: true,
       saveUninitialized: true,
     })
@@ -40,26 +40,14 @@ app.use(bodyParser.json({ limit: '10mb' }));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/admin', adminRouter);
+app.use('/api/citys/',citysRouter);
+app.use('/api/captcha', captcha);
 
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
-});
-
-
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
-});
 
 app.listen(serverConfig.port, serverConfig.host, ()=>{
-  log.warn(`服务启动 server is running to @http://${serverConfig.host}:${serverConfig.port}`);
+  console.warn(`服务启动 server is running to @http://${serverConfig.host}:${serverConfig.port}`);
 })
+
 module.exports = app;

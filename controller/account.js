@@ -62,7 +62,7 @@ async function changePhone(type,account,passwd,newPhone){
     // 修改手机号
     [err,result] = await handle(db_user.changePhone(id,newPhone));
     if(err)throw err;
-    return;
+    return result;
 }
 
 /**
@@ -82,7 +82,13 @@ async function register(type,account,passwd,nickName){
     [err,result] = await handle(db_user.register(type,nickName,account,passwd));
     if(err)throw err;
     // 注册成功
-    return;
+    return result;
 }
 
+module.exports = {
+    register,
+    changePhone,
+    changePasswd,
+    login,
+}
 

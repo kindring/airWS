@@ -1,7 +1,8 @@
 module.exports = {
-    superAdmin:1,
-    userType:2,
-    adminType:3,
+    // 普通用户状态
+    userType:1,
+    // 管理员账户
+    adminType:2,
     // 用户表正常状态
     userNomalState: 1,
     // 用户表封禁状态
@@ -16,4 +17,5 @@ module.exports = {
     cityType_domestic:1,
     // 国际城市
     cityType_international:2,
+
 }

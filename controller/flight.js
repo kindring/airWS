@@ -20,6 +20,17 @@ async function searchFlight(departureCity,targetCity,routeType,startUnixTime,end
     return result;
 }
 
+/**
+ * 航班列表
+ * @param routeType 航班类型
+ * @returns {Promise<*>}
+ */
+async function flightList(routeType){
+    let [err,result] = await handle(db_air.flightList(routeType));
+    if(err){throw err}
+    return result;
+}
+
 
 
 async function addFlight(departureCity,targetCity,routeType,startUnixTime,endUnixTime){

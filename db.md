@@ -18,7 +18,7 @@
 | account | varchar |     | 账号    |
 | phone | varchar |     | 手机号,绑定后等同账号 |
 | passwd | varchar |     | 密码    |
-| accountType | char | 2   | 账户类型  |
+| accountType | char | 1用户,2管理员   | 账户类型1,2  |
 | accountState | char | 1   | 账号状态,封禁 |
 | createTime | date | now | 创建时间  |
 

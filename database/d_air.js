@@ -44,6 +44,21 @@ function flightSearch(departureCity,targetCity,routeType,startUnixTime,endUnixTi
 
 
 /**
+ * 显示所有航班列表
+ * @param routeType
+ * @returns {Promise | Promise<unknown>}
+ */
+function flightList(routeType){
+    let sql=``,values=[];
+    sql=`select * from flight`;
+    if(routeType){
+        sql += ` where routeType = ?`
+        values.push(routeType);
+    }
+    return mysql.pq(sql,values);
+}
+
+/**
  * 获取航班票数
  * @param flightId
  * @returns {Promise<unknown>}
@@ -200,4 +215,5 @@ module.exports = {
     flightSearch,
     addFlight,
     updateFlight,
+    flightList
 }

@@ -7,22 +7,33 @@
  * @LastDescript: 
  */
 const codeMap = require('../maps/rcodeMap');
+const progress = require('../maps/progress');
 /**
  * 检查是否登录
+ * @param accountType 账户类型
  * @param {'json'|'view'} type 返回的数据类型
- * @returns 
+ * @returns
  */
-function checkLogin(type = 'json') {
+function checkLogin(accountType,type = 'json') {
     return function(req, res, next) {
-        console.log('检查是否有登陆');
-        if (!req.session.owner) {
+        let field,redirectPath = progress.userLoginUrl;
+        switch (accountType) {
+            case 2:
+                field = progress.adminSessionField;
+                redirectPath = progress.adminLoginUrl;
+                break;
+            case 1:
+            default:
+                field = progress.userSessionField;
+        }
+        if (!req.session[field]) {
             // 类型
             let resAction;
             switch (type) {
                 case 'view':
                     resAction = {
                         action: 'redirect',
-                        params: [302, '/login']
+                        params: [302, redirectPath]
                     }
                     break;
                 case 'json':
