@@ -195,3 +195,9 @@ function updateFlight(
 function recommendFlight(){
 
 }
+
+module.exports = {
+    flightSearch,
+    addFlight,
+    updateFlight,
+}
