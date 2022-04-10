@@ -37,6 +37,8 @@ async function updateCity(cityId,cityType,cityName){
     return result;
 }
 
+
+
 module.exports = {
     addCity,
     searchCity,

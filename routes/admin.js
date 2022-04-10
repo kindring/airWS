@@ -24,11 +24,20 @@ router.post('/login',
     paramsCheck({
         post:{
             account:{required:true},
-            passwd:{required:true}
+            passwd:{required:true},
+            captcha: { required: true }
         }}),
     async (req,res)=>{
         try{
+            console.log('登录')
+            // 用户登陆
+            let result = {
+                rcode: code.customError
+            };
+            // 提前检查验证码是否正确
+            if (req.body.captcha.toLowerCase() != req.session.captcha) return res.json({...result, msg: `验证码错误,captcha error` });
             let results = await c_user.login(field.adminType,req.body.account,req.body.passwd);
+            console.log(results);
             req.session[progress.adminSessionField] = results;
             res.json({
                 rcode: code.ok,

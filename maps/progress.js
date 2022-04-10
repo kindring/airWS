@@ -6,7 +6,7 @@ module.exports = {
     // 验证码session字段
     captchaSessionField: 'captcha',
     // 后台登陆地址
-    adminLoginUrl: '/admin/login',
+    adminLoginUrl: '/alogin',
     // 用户登陆地址
     userLoginUrl: '/login',
 }

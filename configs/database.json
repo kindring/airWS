@@ -1,8 +1,8 @@
 {
-    "host": "localhost",
-    "port": "3306",
+    "host": "kindring.cn",
+    "port": "3307",
     "user": "air",
-    "password": "airFly",
+    "password": "airair",
     "connectionLimit": "100",
-    "database": "db_air"
+    "database": "air_db"
 }

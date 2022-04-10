@@ -18,10 +18,10 @@ const checkArgumentsIsEmpty = require("../until/checkArgumentsIsEmpty");
  */
 function flightSearch(departureCity,targetCity,routeType,startUnixTime,endUnixTime){
     let sql=``,values=[];
-    sql = `select f.* ,dep.cityname as departureCityName,tar.cityname as targetCityName from
+    sql = `select f.* ,dep.cityname as departureCityName,tar.cityName as targetCityName from
             flight as f
-            LEFT JOIN (select id,cityname from area ) as dep on dep.id = f.departureCity
-            LEFT JOIN (select id,cityname from area ) as tar on tar.id = f.targetCity
+            LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity
+            LEFT JOIN (select id,cityName from area ) as tar on tar.id = f.targetCity
             where f.departureCity = ? and f.targetCity = ?`;
     values.push(departureCity,targetCity);
     if(routeType){

@@ -7,7 +7,7 @@ const field = require('../maps/field')
 
 router.get('/list',async (req,res)=>{
     try{
-        let results = await c_area.searchCity(req.query.cityType);
+        let results = await c_area.searchCity(req.query.type);
         res.json({
             rcode: code.ok,
             data: results
@@ -29,7 +29,7 @@ router.post('/add',
     checkLogin(field.adminType),
     paramsCheck({
         post:{
-            cityType:{required:true},
+            cityType:{required:true,default:field.cityType_domestic},
             cityName:{required:true}
         }
     }),

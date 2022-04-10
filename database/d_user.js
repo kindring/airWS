@@ -32,7 +32,7 @@ function findPhoneUser(userType,phone){
  * @returns {Promise<unknown>}
  */
 function login(userType,account,passwd){
-    let sql = `select * from user where type = ? and account = ? and passwd = ?`;
+    let sql = `select * from user where accountType = ? and account = ? and passwd = ?`;
     let values = [...arguments];
     return mysql.pq(sql,values);
 }

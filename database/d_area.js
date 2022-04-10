@@ -12,7 +12,7 @@ const checkArgumentsIsEmpty = require('../until/checkArgumentsIsEmpty')
  */
 function addArea(cityType = field.cityType_domestic,cityName){
     let sql=``,values=[];
-    sql+=`insert into (cityname,cityType) values(?,?);`
+    sql+=`insert into area (cityName,cityType) values(?,?);`
     values.push(cityName,cityType)
     return mysql.pq(sql,values);
 }
@@ -49,7 +49,7 @@ function updateCity(cityId,cityType,cityName){
         values.push(cityType)
     }
     if(cityName){
-        sql+=' cityname = ?'
+        sql+=' cityName = ?'
         values.push(cityName)
     }
     sql += ` where id = ?;`

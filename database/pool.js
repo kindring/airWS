@@ -14,6 +14,7 @@ const databseConfig = require('../configs/database.json'); //数据库连接的�
 const pool = mysql.createPool({
     connectionLimit: databseConfig.connectionLimit || 100, //连接限制
     host: databseConfig.host, //地址
+    port: databseConfig.port,//端口
     user: databseConfig.user, //用户
     password: databseConfig.password, // 密码
     database: databseConfig.database // 数据库名称

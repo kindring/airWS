@@ -39,9 +39,9 @@ app.use(bodyParser.json({ limit: '10mb' }));
 
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/user', usersRouter);
 app.use('/admin', adminRouter);
-app.use('/api/citys/',citysRouter);
+app.use('/api/city/',citysRouter);
 app.use('/api/captcha', captcha);
 
 
