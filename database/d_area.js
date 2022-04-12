@@ -36,20 +36,22 @@ function searchAreas(cityType){
 /**
  * 更新指定城市
  * @param cityId 城市id
- * @param cityType 新的城市类型
- * @param cityName 新的城市名
+ * @param cityName 新的城市类型
+ * @param cityType 新的城市名
  * @returns {Promise<unknown>}
  */
-function updateCity(cityId,cityType,cityName){
+function updateCity(cityId,cityName,cityType){
     let sql=``,values=[];
     if(checkArgumentsIsEmpty(Array.from(arguments))){throw {rcode:code.notParam}}
     sql+=`update area set`
     if(cityType){
         sql+=' cityType = ?'
         values.push(cityType)
+
     }
     if(cityName){
-        sql+=' cityName = ?'
+        if(values.length>0){sql+=','}
+        sql+='cityName = ?'
         values.push(cityName)
     }
     sql += ` where id = ?;`

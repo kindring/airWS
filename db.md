@@ -35,7 +35,6 @@
 | 字段            | 类型      | 默认值 | 可选值                      | 备注     |
 |---------------|---------|-----|--------------------------|--------|
 | id            | int     | pk  | n                        | id     |
-| routeId       | int     | pk  | 1                        | n      | 对应的航线id |
 | originalPrice | floor   | 1   | 0-99999                  | 原始机票价格 |
 | currentPrice  | floor   | 1   | 0-99999                  | 当前机票价格 |
 | sailingTime   | varcahr    | 0 | 0                      | 起飞时间,unix时间戳   |

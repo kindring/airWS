@@ -56,12 +56,11 @@ router.post('/add',
 router.post('/change',
     checkLogin(field.adminType),
     paramsCheck({
-        body:{
-            cityType:{required:true},
-            cityName:{required:true}
+        post:{
+            cityId: {required:true},
         }}),async (req,res)=>{
         try{
-            let results = await c_area.addCity(req.body.cityType,req.body.cityName);
+            let results = await c_area.updateCity(req.body.cityId,req.body.cityName,req.body.cityType);
             res.json({
                 rcode: code.ok,
                 data: results

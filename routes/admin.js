@@ -46,7 +46,7 @@ router.post('/login',
         }catch (error) {
             if (error.rcode !== code.customError) {
                 console.log(error);
-                console.log.error(`login error ${error.message||error.msg}`);
+                console.error(`login error ${error.message||error.msg}`);
             }
             res.json({
                 rcode: error.rcode || code.serverError,
@@ -56,13 +56,11 @@ router.post('/login',
 })
 
 // 退出登陆
-router.post('/logout',
+router.get('/logout',
     async (req,res)=>{
         try{
             req.session[progress.adminSessionField] = null;
-            res.json({
-                rcode: code.ok,
-            })
+            res.redirect(302,progress.adminLoginUrl)
         }catch (error) {
             if (error.rcode !== code.customError) {
                 console.log(error);
