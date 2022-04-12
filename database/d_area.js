@@ -18,6 +18,18 @@ function addArea(cityType = field.cityType_domestic,cityName){
 }
 
 /**
+ * 获取航班类型
+ * @param cityId
+ */
+function cityType(cityId){
+    let sql = ``,values = [];
+    sql = `select cityType from area where id = ?`
+    values.push(cityId)
+    sql += ';'
+    return mysql.pq(sql,values);
+}
+
+/**
  * 搜索地区
  * @param [cityType] 城市类型
  * @returns {Promise<unknown>}
@@ -64,4 +76,5 @@ module.exports = {
     updateCity,
     addArea,
     searchAreas,
+    cityType
 }

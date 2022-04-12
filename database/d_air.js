@@ -116,6 +116,8 @@ function addFlight(flightName,
     return mysql.pq(sql,values);
 }
 
+
+
 /**
  * 修改航班信息
  * @param flightId
@@ -214,6 +216,7 @@ function recommendFlight(){
 module.exports = {
     flightSearch,
     addFlight,
+    flightTicks,
     updateFlight,
     flightList
 }

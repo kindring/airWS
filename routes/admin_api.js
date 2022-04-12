@@ -4,7 +4,7 @@ const field = require('../maps/field')
 const code = require("../maps/rcodeMap");
 const progress = require("../maps/progress");
 const c_user = require("../controller/account");
-const c_flight = require("../controller/flight");
+const c_flight = require("../controller/c_flight");
 const paramsCheck = require("../middleware/paramsCheck");
 // 获取航班列表数据
 router.get('/flights',
