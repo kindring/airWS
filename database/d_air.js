@@ -18,10 +18,11 @@ const checkArgumentsIsEmpty = require("../until/checkArgumentsIsEmpty");
  */
 function flightSearch(departureCity,targetCity,routeType,startUnixTime,endUnixTime){
     let sql=``,values=[];
-    sql = `select f.* ,dep.cityname as departureCityName,tar.cityName as targetCityName from
+    sql = `select f.id,f.originalPrice,f.currentPrice,f.sailingTime,f.langdinTime ,dep.cityname as departureCityName,tar.cityname as targetCityName
+            from
             flight as f
-            LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity
-            LEFT JOIN (select id,cityName from area ) as tar on tar.id = f.targetCity
+            LEFT JOIN (select id,cityname from area ) as dep on dep.id = f.departureCity
+            LEFT JOIN (select id,cityname from area ) as tar on tar.id = f.targetCity;
             where f.departureCity = ? and f.targetCity = ?`;
     values.push(departureCity,targetCity);
     if(routeType){
@@ -43,18 +44,34 @@ function flightSearch(departureCity,targetCity,routeType,startUnixTime,endUnixTi
 }
 
 
+
 /**
- * 显示所有航班列表
+ * 显示所有航班列表,管理员级别
  * @param routeType
  * @returns {Promise | Promise<unknown>}
  */
-function flightList(routeType){
+function flightList(){
     let sql=``,values=[];
-    sql=`select * from flight`;
-    if(routeType){
-        sql += ` where routeType = ?`
-        values.push(routeType);
-    }
+    sql=`select f.* ,dep.cityname as departureCityName,tar.cityname as targetCityName
+            from
+            flight as f
+            LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity
+            LEFT JOIN (select id,cityName from area ) as tar on tar.id = f.targetCity;`;
+    return mysql.pq(sql,values);
+}
+
+/**
+ * 航班具体信息
+ * @param flightId
+ * @returns {Promise<unknown>}
+ */
+function flightInfo(flightId){
+    let sql=``,values=[];
+    sql+=`select ff.*,count(flightId = ? or null) as pay
+            from 
+            (select * from flight where id = ?) as ff,
+            airTickets;`
+    values.push(flightId,flightId)
     return mysql.pq(sql,values);
 }
 
@@ -218,5 +235,6 @@ module.exports = {
     addFlight,
     flightTicks,
     updateFlight,
-    flightList
+    flightList,
+    flightInfo
 }

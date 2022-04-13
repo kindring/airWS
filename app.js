@@ -10,6 +10,8 @@ const usersRouter = require('./routes/users');
 const citysRouter = require('./routes/citys');
 const adminRouter = require('./routes/admin');
 const captcha = require('./routes/captcha');
+const flight = require('./routes/flight_api');
+
 const app = express();
 
 const serverConfig = require('./configs/server.json');
@@ -43,6 +45,7 @@ app.use('/user', usersRouter);
 app.use('/admin', adminRouter);
 app.use('/api/city/',citysRouter);
 app.use('/api/captcha', captcha);
+app.use('/api/flight', flight);
 
 
 

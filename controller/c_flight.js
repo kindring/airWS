@@ -6,7 +6,7 @@ const field = require('../maps/field')
 const codeMap = require('../maps/rcodeMap')
 
 /**
- *
+ * 用户查询指定出发时间的航班
  * @param departureCity 出发城市
  * @param targetCity 目标城市
  * @param routeType 航线类型
@@ -21,7 +21,7 @@ async function searchFlight(departureCity,targetCity,routeType,startUnixTime,end
 }
 
 /**
- * 航班列表
+ * 航班列表,所有航班列表
  * @param routeType 航班类型
  * @returns {Promise<*>}
  */
@@ -31,6 +31,16 @@ async function flightList(routeType){
     return result;
 }
 
+/**
+ * 航班具体信息,用来给用户直接查看航班
+ * @param flightId
+ * @returns {Promise<void>}
+ */
+async function flightInfo(flightId){
+    let [err,result] = await handle(db_air.flightInfo(flightId));
+    if(err){throw err}
+    return result;
+}
 
 
 /**
@@ -97,5 +107,5 @@ module.exports = {
     searchFlight,
     flightList,
     addFlight,
-
+    flightInfo
 }

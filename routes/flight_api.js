@@ -1,13 +1,14 @@
 const router = require('express').Router();
-const c_area = require('../controller/c_area')
+const c_flight = require('../controller/c_flight')
 const paramsCheck = require('../middleware/paramsCheck');
 const checkLogin = require('../middleware/checkLogin');
 const code = require('../maps/rcodeMap')
 const field = require('../maps/field')
+const c_area = require("../controller/c_area");
 
 router.get('/list',async (req,res)=>{
     try{
-        let results = await c_area.searchCity(req.query.type);
+        let results = await c_flight.flightList();
         res.json({
             rcode: code.ok,
             data: results
@@ -15,27 +16,31 @@ router.get('/list',async (req,res)=>{
     }catch (error) {
         if (error.rcode !== code.customError) {
             console.log(error);
-            console.log.error(`get area map error ${error.message||error.msg}`);
         }
         res.json({
             rcode: error.rcode || code.serverError,
             msg: error.msg || error.message
         });
     }
-})
+});
 
-// 新增地区
-router.post('/add',
-    checkLogin(field.adminType),
+router.post('/search',
     paramsCheck({
         post:{
-            cityType:{required:true,default:field.cityType_domestic},
-            cityName:{required:true}
+            departure:{required:true},
+            target:{required:true},
         }
     }),
     async (req,res)=>{
     try{
-        let results = await c_area.addCity(req.body.cityType,req.body.cityName);
+        let params = [
+             req.body.departure,
+             req.body.target,
+             req.body.routeType,
+             req.body.startTime,
+             req.body.endTime,
+        ]
+        let results = await c_flight.searchFlight(...params);
         res.json({
             rcode: code.ok,
             data: results
@@ -43,7 +48,6 @@ router.post('/add',
     }catch (error) {
         if (error.rcode !== code.customError) {
             console.log(error);
-            console.log.error(`get area map error ${error.message||error.msg}`);
         }
         res.json({
             rcode: error.rcode || code.serverError,
@@ -52,15 +56,15 @@ router.post('/add',
     }
 })
 
-// 修改地区
-router.post('/change',
-    checkLogin(field.adminType),
+router.get('/detail',
     paramsCheck({
-        post:{
-            cityId: {required:true},
-        }}),async (req,res)=>{
+        get:{
+            flight:{required:true}
+        }
+    }),
+    async (req,res)=>{
         try{
-            let results = await c_area.updateCity(req.body.cityId,req.body.cityName,req.body.cityType);
+            let results = await c_flight.flightInfo(req.query.flight);
             res.json({
                 rcode: code.ok,
                 data: results
@@ -74,6 +78,6 @@ router.post('/change',
                 msg: error.msg || error.message
             });
         }
-    })
-
+    }
+)
 module.exports = router;
