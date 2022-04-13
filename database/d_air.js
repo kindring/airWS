@@ -93,7 +93,7 @@ function flightTicks(flightId){
 /**
  * 添加航班
  * @param flightName 航班名
- * @param airplaneCode 飞机代码
+ * @param airCode 飞机代码
  * @param originalPrice 原始价格
  * @param currentPrice 当前价格
  * @param sailingTime 起飞时间
@@ -105,7 +105,7 @@ function flightTicks(flightId){
  * @returns {Promise<unknown>}
  */
 function addFlight(flightName,
-                   airplaneCode,
+                   airCode,
                    originalPrice,
                    currentPrice,
                    sailingTime,
@@ -117,7 +117,7 @@ function addFlight(flightName,
     let sql = ``,values = [];
     sql = `insert into flight 
     (
-        flightName,airplaneCode,
+        flightName,airCode,
         originalPrice,currentPrice,
         sailingTime,langdinTime,
         totalVotes,routeType,

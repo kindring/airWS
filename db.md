@@ -32,21 +32,21 @@
 
 
 ## 航班表flight(管理员通过航线创建航班),需要输入价格和指定飞机和起飞时间
-| 字段            | 类型      | 默认值 | 可选值                      | 备注     |
-|---------------|---------|-----|--------------------------|--------|
-| id            | int     | pk  | n                        | id     |
+| 字段           | 类型      | 默认值 | 可选值                      | 备注     |
+|--------------|---------|-----|--------------------------|--------|
+| id           | int     | pk  | n                        | id     |
 | originalPrice | floor   | 1   | 0-99999                  | 原始机票价格 |
-| currentPrice  | floor   | 1   | 0-99999                  | 当前机票价格 |
-| sailingTime   | varcahr    | 0 | 0                      | 起飞时间,unix时间戳   |
-| langdinTime   | varcahr    | 0 | 0                     | 到站时间,unix时间戳   |
-| airplaneCode  | varcahr | 755 | s                        | 飞机代号   |
-| flightState   | char    | 1   | 1(售票),2(值机),3(飞行中),4(结束) | 航班状态   |
-| lateState     | cahr    | 1   | 1(正点),2(晚点)              | 航班晚点状态 |
-| totalVotes    | int | 3   | 1-200                    | 售卖总票数  |
-| routeType     | char | 1 | 1(国内),2(国际) | 航线类型,是否为跨国航线,程序自动生成 | 
+| currentPrice | floor   | 1   | 0-99999                  | 当前机票价格 |
+| sailingTime  | varcahr    | 0 | 0                      | 起飞时间,unix时间戳   |
+| langdinTime  | varcahr    | 0 | 0                     | 到站时间,unix时间戳   |
+| airCode  | varcahr | 755 | s                        | 飞机代号   |
+| flightState  | char    | 1   | 1(售票),2(值机),3(飞行中),4(结束) | 航班状态   |
+| lateState    | cahr    | 1   | 1(正点),2(晚点)              | 航班晚点状态 |
+| totalVotes   | int | 3   | 1-200                    | 售卖总票数  |
+| routeType    | char | 1 | 1(国内),2(国际) | 航线类型,是否为跨国航线,程序自动生成 | 
 | departureCity | int  | null | n           | 出发城市          |
-| targetCity    | int  | null | n           | 目标城市          |
-| flightName    | varchar | '' | '' | 航班名称 | 
+| targetCity   | int  | null | n           | 目标城市          |
+| flightName   | varchar | '' | '' | 航班名称 | 
 
 ## 机票表 airTickets
 | 字段       | 类型      | 默认值 | 可选值 | 备注                  |
