@@ -103,6 +103,26 @@ async function addFlight(
     return result;
 }
 
+/**
+ * 修改航班信息
+ * @param flightId
+ * @param updateOption
+ * @returns {Promise<void>}
+ */
+async function updateFlight(flightId,updateOption){
+    let err,result,departCityType,targetCityType,routerType;
+    if(updateOption.departureCity){
+        // 获取城市类型
+        [err,departCityType] = await handle(db_area.cityType(departureCity));
+    }
+    if(updateOption.departureCity){
+        // 获取城市类型
+        [err,departCityType] = await handle(db_area.cityType(departureCity));
+    }
+
+    [err,targetCityType] = await handle(db_area.cityType(targetCity));
+}
+
 module.exports = {
     searchFlight,
     flightList,
