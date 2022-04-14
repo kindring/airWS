@@ -56,15 +56,15 @@ router.post('/search',
     }
 })
 
-router.get('/detail',
+router.get('/info',
     paramsCheck({
         get:{
-            flight:{required:true}
+            flightId:{required:true}
         }
     }),
     async (req,res)=>{
         try{
-            let results = await c_flight.flightInfo(req.query.flight);
+            let results = await c_flight.flightInfo(req.query.flightId);
             res.json({
                 rcode: code.ok,
                 data: results
@@ -90,7 +90,7 @@ router.post('/add',
             airCode:{required:true},
             originalPrice:{required:true},
             currentPrice:{required:true},
-            seilingTime:{required:true},
+            sailingTime:{required:true},
             langdinTime:{required:true},
             totalVotes:{required:true},
             departureCity:{required:true},
@@ -104,7 +104,7 @@ router.post('/add',
                 req.body.airCode,
                 req.body.originalPrice,
                 req.body.currentPrice,
-                req.body.seilingTime,
+                req.body.sailingTime,
                 req.body.langdinTime,
                 req.body.totalVotes,
                 req.body.departureCity,
@@ -137,17 +137,9 @@ router.post('/update',
     }),
     async (req,res)=>{
         try{
-            let results = await c_flight.updateFlight({
-                flightName:req.body.flightName,
-                airCode:req.body.airCode,
-                originalPrice:req.body.originalPrice,
-                currentPrice:req.body.currentPrice,
-                seilingTime:req.body.seilingTime,
-                langdinTime:req.body.langdinTime,
-                totalVotes:req.body.totalVotes,
-                departureCity:req.body.departureCity,
-                targetCity:req.body.targetCity
-            });
+            console.log()
+
+            let results = await c_flight.updateFlight(req.body.flightId, req.body.newOption);
             res.json({
                 rcode: code.ok,
                 data: results

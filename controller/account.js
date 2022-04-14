@@ -5,6 +5,13 @@ const codeMap = require('../maps/rcodeMap')
 const {userType} = require("../maps/field");
 // 处理账号的注册登录,
 
+async function checkAccount(account,userType= field.userType){
+    let [err,result] = await handle(db_user.findAccountUser(userType,account));
+    if(err){throw err}
+    // 查看是否有结果
+    if (result.length >= 1 ) {throw {rcode:codeMap.notFound,msg:'该账户已经被注册'}}
+    return true;
+}
 /**
  * 用户登录,返回用户名
  * @param userType
@@ -15,7 +22,7 @@ const {userType} = require("../maps/field");
 async function login(userType = field.userType,account,passwd){
     let [err,result] = await handle(db_user.login(userType,account,passwd));
     if(err){throw err}
-    // 查看是否有结果
+    // 查看是否有结果,没有结果自动告知账户或者密码错误
     if (result.length < 1 ) {throw {rcode:codeMap.notFound,msg:'账号或者密码错误'}}
     // 账号被冻结
     if (result[0].state == field.userFreezeState ){throw {rcode:codeMap.permissionDenied,msg:'账号被冻结'}}
@@ -77,7 +84,7 @@ async function register(type,account,passwd,nickName){
     // 根据账号和原密码查找id
     let [err,result] = await handle(db_user.findAccountUser(type,account));
     if(err)throw err;
-    if(result[0].total){throw {rcode:codeMap.dataRepeat,msg:'账号重复'}}
+    if(result.length&&result[0].total){throw {rcode:codeMap.dataRepeat,msg:'账号重复'}}
     // 新增用户
     [err,result] = await handle(db_user.register(type,nickName,account,passwd));
     if(err)throw err;
@@ -89,6 +96,7 @@ module.exports = {
     register,
     changePhone,
     changePasswd,
+    checkAccount,
     login,
 }
 

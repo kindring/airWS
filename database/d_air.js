@@ -116,18 +116,11 @@ function addFlight(flightName,
                    targetCity){
     let sql = ``,values = [];
     sql = `insert into flight 
-    (
-        flightName,airCode,
-        originalPrice,currentPrice,
-        sailingTime,langdinTime,
-        totalVotes,routeType,
-        departureCity,targetCity
-    ) values(
-        ?,?,
-        ?,?,
-        ?,?,
-        ?,?
-        )`;
+    (flightName,airCode,originalPrice,currentPrice,
+    sailingTime,langdinTime,
+    totalVotes,routeType,
+    departureCity,targetCity
+    ) values(?,?,?,?,?,?,?,?,?,?)`;
     values.push(...arguments);
     sql += ';'
     return mysql.pq(sql,values);
@@ -146,14 +139,16 @@ function updateFlight(flightId,updateOptions){
     let _arguments = Array.from(arguments);
 
     // 判断如果所有参数都为空时抛出异常
-    sql+=`update from flight set`
+    sql+=`update flight set `
     let keys = Object.keys(updateOptions);
     if(keys.length < 1){
         throw {rcode:code.notParam,msg:'没有修改项'}
     }
     for(let i = 0;i<keys.length;i++){
         let field = keys[i];
-        if(i>0){sql+=','}
+        if(!updateOptions[field]){continue;}
+        console.log(i);
+        if(values.length > 0){sql+=','}
         sql+=`${field} = ?`
         values.push(updateOptions[field])
     }

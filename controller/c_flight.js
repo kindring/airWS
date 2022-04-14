@@ -39,7 +39,10 @@ async function flightList(routeType){
 async function flightInfo(flightId){
     let [err,result] = await handle(db_air.flightInfo(flightId));
     if(err){throw err}
-    return result;
+    if(!result.length){
+        throw {rcode:codeMap.notFound,msg:'无法找到航班'}
+    }
+    return result[0];
 }
 
 
@@ -49,8 +52,8 @@ async function flightInfo(flightId){
  * @param airCode 飞机代号
  * @param originalPrice 原始价格
  * @param currentPrice 当前价格
- * @param seilingTime 出发时间
- * @param langdingTime 落地时间
+ * @param sailingTime 出发时间
+ * @param langdinTime 落地时间
  * @param totalVotes 票数量
  * @param departureCity 出发城市id
  * @param targetCity 目标城市id
@@ -59,15 +62,15 @@ async function flightInfo(flightId){
 async function addFlight(
     flightName,airCode,
     originalPrice,currentPrice,
-    seilingTime,langdingTime,
+    sailingTime,langdinTime,
     totalVotes,departureCity,targetCity){
     let err,result,departCityType,targetCityType,routerType;
     // 检查参数
-    if(!flightName||!airCode||!originalPrice||!currentPrice||!seilingTime||!langdingTime||!totalVotes||!departureCity||!targetCity){
+    if(!flightName||!airCode||!originalPrice||!currentPrice||!sailingTime||!langdinTime||!totalVotes||!departureCity||!targetCity){
         throw {rcode:codeMap.notParam,msg:``}
     }
     // 判断时间是否合法
-    if(seilingTime >= langdingTime){
+    if(sailingTime >= langdinTime){
         throw {rcode:codeMap.customError,msg:`出发时间晚于到站时间`}
     }
     // 获取城市类型
@@ -92,8 +95,8 @@ async function addFlight(
         airCode,
         originalPrice,
         currentPrice,
-        seilingTime,
-        langdingTime,
+        sailingTime,
+        langdinTime,
         totalVotes,
         routerType,
         departureCity,
@@ -112,7 +115,8 @@ async function addFlight(
 async function updateFlight(flightId,updateOption){
     let err,result,departCityType,targetCityType,routerType;
     let updateOptions = {}
-
+    console.log(flightId);
+    console.log(updateOption);
     // 如果修改了城市,那么直接修改对应的航班类型
     if(updateOption.departureCity){
         [err,departCityType] = await handle(db_area.cityType(updateOption.departureCity));
@@ -144,7 +148,7 @@ async function updateFlight(flightId,updateOption){
     updateOptions.airCode = updateOption.airCode;
     updateOptions.originalPrice = updateOption.originalPrice;
     updateOptions.currentPrice = updateOption.currentPrice;
-    updateOptions.seilingTime = updateOption.seilingTime;
+    updateOptions.sailingTime = updateOption.sailingTime;
     updateOptions.langdinTime = updateOption.langdinTime;
     updateOptions.totalVotes = updateOption.totalVotes;
     updateOptions.departureCity = updateOption.departureCity;

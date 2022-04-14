@@ -7,7 +7,7 @@ const mysql = require('./mysql');
  * @returns {Promise<unknown>}
  */
 function findAccountUser(userType,account){
-    let sql = `select count(*) as total from user where type = ? and account = ?`;
+    let sql = `select * from user where accountType = ? and account = ?`;
     let values = [userType,account];
     return mysql.pq(sql,values);
 }
@@ -19,7 +19,7 @@ function findAccountUser(userType,account){
  * @returns {Promise<unknown>}
  */
 function findPhoneUser(userType,phone){
-    let sql = `select count(*) as total from user where type = ? and phone = ?`;
+    let sql = `select count(*) as total from user where accountType = ? and phone = ?`;
     let values = [userType,phone];
     return mysql.pq(sql,values);
 }
@@ -71,8 +71,8 @@ function changePhone(id,phone){
  * @returns {Promise<unknown>}
  */
 function register(userType,nickName,account,passwd){
-    let sql = `insert into user(nickName,account,passwd,type) values(?,?,?,?)`;
-    let values = [newPasswd,id];
+    let sql = `insert into user(nickName,account,passwd,accountType) values(?,?,?,?)`;
+    let values = [nickName,account,passwd,userType];
     return mysql.pq(sql,values);
 }
 
