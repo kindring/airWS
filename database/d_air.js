@@ -138,87 +138,24 @@ function addFlight(flightName,
 /**
  * 修改航班信息
  * @param flightId
- * @param flightName
- * @param airplaneCode
- * @param originalPrice
- * @param currentPrice
- * @param sailingTime
- * @param langdinTime
- * @param totalVotes
- * @param routeType
- * @param departureCity
- * @param targetCity
+ * @param updateOptions
  * @returns {Promise<unknown>}
  */
-function updateFlight(
-                      flightId,
-                      flightName,
-                      airplaneCode,
-                      originalPrice,
-                      currentPrice,
-                      sailingTime,
-                      langdinTime,
-                      totalVotes,
-                      routeType,
-                      departureCity,
-                      targetCity){
+function updateFlight(flightId,updateOptions){
     let sql=``,values=[];
     let _arguments = Array.from(arguments);
 
     // 判断如果所有参数都为空时抛出异常
-    if(checkArgumentsIsEmpty(Array.from(arguments))){
-        throw {rcode:code.notParam}
+    sql+=`update from flight set`
+    let keys = Object.keys(updateOptions);
+    if(keys.length < 1){
+        throw {rcode:code.notParam,msg:'没有修改项'}
     }
-    sql+=`update area set`
-    //航班名
-    if(flightName){
-        sql+=' flightName = ?'
-        values.push(flightName)
-    }
-    //机票代码
-    if(airplaneCode){
-        sql+=' airplaneCode = ?'
-        values.push(airplaneCode)
-    }
-    //原始价格
-    if(originalPrice){
-        sql+=' originalPrice = ?'
-        values.push(originalPrice)
-    }
-    // 当前价格
-    if(currentPrice){
-        sql+=' currentPrice = ?'
-        values.push(currentPrice)
-    }
-    //起飞时间
-    if(sailingTime){
-        sql+=' sailingTime = ?'
-        values.push(sailingTime)
-    }
-    // 登录时间
-    if(langdinTime){
-        sql+=' langdinTime = ?'
-        values.push(langdinTime)
-    }
-    //票数
-    if(totalVotes){
-        sql+=' totalVotes = ?'
-        values.push(totalVotes)
-    }
-    //航线类型
-    if(routeType){
-        sql+=' routeType = ?'
-        values.push(routeType)
-    }
-    //出发城市
-    if(departureCity){
-        sql+=' departureCity = ?'
-        values.push(departureCity)
-    }
-    // 目标城市
-    if(targetCity){
-        sql+=' targetCity = ?'
-        values.push(targetCity)
+    for(let i = 0;i<keys.length;i++){
+        let field = keys[i];
+        if(i>0){sql+=','}
+        sql+=`${field} = ?`
+        values.push(updateOptions[field])
     }
     sql += ` where id = ?;`
     values.push(flightId);

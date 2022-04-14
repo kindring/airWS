@@ -111,21 +111,53 @@ async function addFlight(
  */
 async function updateFlight(flightId,updateOption){
     let err,result,departCityType,targetCityType,routerType;
+    let updateOptions = {}
+
+    // 如果修改了城市,那么直接修改对应的航班类型
     if(updateOption.departureCity){
-        // 获取城市类型
-        [err,departCityType] = await handle(db_area.cityType(departureCity));
+        [err,departCityType] = await handle(db_area.cityType(updateOption.departureCity));
+        if(err) throw err;
+        departCityType = departCityType[0].cityType;
+        if(departCityType){
+            // 判断是否为国内城市
+            if(departCityType==field.cityType_international){
+                routerType = field.routeType_international;
+            }
+        }
     }
-    if(updateOption.departureCity){
-        // 获取城市类型
-        [err,departCityType] = await handle(db_area.cityType(departureCity));
+    if(updateOption.targetCity){
+        [err,targetCityType] = await handle(db_area.cityType(updateOption.departureCity));
+        if(err) throw err;
+        targetCityType = targetCityType[0].cityType;
+        if(targetCityType) {
+            // 判断是否为国内城市
+            if (targetCityType == field.cityType_international) {
+                routerType = field.routeType_international;
+            }
+        }
     }
 
-    [err,targetCityType] = await handle(db_area.cityType(targetCity));
+    if(routerType){
+        updateOptions.routeType = routerType;
+    }
+    updateOptions.flightName = updateOption.flightName;
+    updateOptions.airCode = updateOption.airCode;
+    updateOptions.originalPrice = updateOption.originalPrice;
+    updateOptions.currentPrice = updateOption.currentPrice;
+    updateOptions.seilingTime = updateOption.seilingTime;
+    updateOptions.langdinTime = updateOption.langdinTime;
+    updateOptions.totalVotes = updateOption.totalVotes;
+    updateOptions.departureCity = updateOption.departureCity;
+    updateOptions.targetCity = updateOption.targetCity;
+    [err,result] = await handle(db_air.updateFlight(flightId,updateOptions));
+    if(err) throw err;
+    return result
 }
 
 module.exports = {
     searchFlight,
     flightList,
     addFlight,
+    updateFlight,
     flightInfo
 }

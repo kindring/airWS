@@ -8,11 +8,15 @@
  */
 function handle(promise) {
     return new Promise(resolve => {
-        promise.then(val => {
-            resolve([null, val])
-        }).catch(err => {
-            resolve([err])
-        })
+        try{
+            promise.then(val => {
+                resolve([null, val])
+            }).catch(err => {
+                resolve([err])
+            })
+        }catch (e) {
+            resolve([e]);
+        }
     })
 }
 

@@ -137,17 +137,17 @@ router.post('/update',
     }),
     async (req,res)=>{
         try{
-            let results = await c_flight.(
-                req.body.flightName,
-                req.body.airCode,
-                req.body.originalPrice,
-                req.body.currentPrice,
-                req.body.seilingTime,
-                req.body.langdinTime,
-                req.body.totalVotes,
-                req.body.departureCity,
-                req.body.targetCity,
-            );
+            let results = await c_flight.updateFlight({
+                flightName:req.body.flightName,
+                airCode:req.body.airCode,
+                originalPrice:req.body.originalPrice,
+                currentPrice:req.body.currentPrice,
+                seilingTime:req.body.seilingTime,
+                langdinTime:req.body.langdinTime,
+                totalVotes:req.body.totalVotes,
+                departureCity:req.body.departureCity,
+                targetCity:req.body.targetCity
+            });
             res.json({
                 rcode: code.ok,
                 data: results
