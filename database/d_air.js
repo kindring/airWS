@@ -3,6 +3,7 @@ const mysql = require('./mysql');
 const until_time = require('../until/time');
 const {getUnixTimeStamp} = require("../until/time");
 const code = require("../maps/rcodeMap");
+const fields = require("../maps/field");
 const checkArgumentsIsEmpty = require("../until/checkArgumentsIsEmpty");
 // 查询指定城市航班
 
@@ -162,11 +163,49 @@ function recommendFlight(){
 
 }
 
+/**
+ * 售票的航班信息
+ * @param num
+ * @returns {Promise<unknown>}
+ */
+function sailFlights(num = 5){
+    let sql=``,values=[];
+    // 判断状态为
+    sql+=`select f.id,f.currentPrice,f.sailingTime,f.langdinTime,dep.cityname as departureCityName,tar.cityname as targetCityName
+            from
+            flight as f
+            LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity
+            LEFT JOIN (select id,cityName from area ) as tar on tar.id = f.targetCity
+            where flightState = ? ORDER BY f.createTime desc limit 0,?;`
+    values.push(fields.flightState_sail,num);
+    return mysql.pq(sql,values);
+}
+
+/**
+ * 检票中的航班信息
+ * @param num
+ * @returns {Promise<unknown>}
+ */
+function wicketFlights(num = 5){
+    let sql=``,values=[];
+    // 判断状态为
+    sql+=`select f.id,f.currentPrice,f.sailingTime,f.langdinTime,f.createTime,dep.cityname as departureCityName,tar.cityname as targetCityName
+            from
+            flight as f
+            LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity
+            LEFT JOIN (select id,cityName from area ) as tar on tar.id = f.targetCity
+            where flightState = ? ORDER BY f.sailingTime desc limit 0,?;`
+    values.push(fields.flightState_wicket,num);
+    return mysql.pq(sql,values);
+}
+
 module.exports = {
     flightSearch,
     addFlight,
     flightTicks,
     updateFlight,
     flightList,
-    flightInfo
+    flightInfo,
+    wicketFlights,
+    sailFlights
 }

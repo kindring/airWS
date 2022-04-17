@@ -17,5 +17,8 @@ module.exports = {
     cityType_domestic:1,
     // 国际城市
     cityType_international:2,
-
+    // 航班售票中
+    flightState_sail: 1,
+    // 航班检票状态
+    flightState_wicket:2,
 }

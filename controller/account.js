@@ -92,11 +92,29 @@ async function register(type,account,passwd,nickName){
     return result;
 }
 
+/**
+ * 加载用户信息
+ * @param type
+ * @param account
+ * @returns {Promise<void>}
+ */
+async function info(type,account){
+    // 根据账号和原密码查找id
+    let [err,result] = await handle(db_user.info(type,account));
+    if(err)throw err;
+    if(result.length < 1){
+        throw {rcode:codeMap.notFound,msg:'无法找到账户'}
+    }
+    // 注册成功
+    return result[0];
+}
+
 module.exports = {
     register,
     changePhone,
     changePasswd,
     checkAccount,
     login,
+    info
 }
 

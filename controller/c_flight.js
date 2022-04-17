@@ -158,10 +158,27 @@ async function updateFlight(flightId,updateOption){
     return result
 }
 
+/**
+ * 航班相关新闻
+ * @param nums 每种类型的数量
+ * @returns {Promise<void>}
+ */
+async function news(nums){
+    let result = {},sailFlights,wicketFlights;
+    [err,wicketFlights] = await handle(db_air.wicketFlights(nums));
+    if(err){throw err}
+    [err,sailFlights] = await handle(db_air.sailFlights(nums));
+    if(err){throw err}
+    result.sailFlights = sailFlights;
+    result.wicketFlights = wicketFlights;
+    return result;
+}
+
 module.exports = {
     searchFlight,
     flightList,
     addFlight,
     updateFlight,
-    flightInfo
+    flightInfo,
+    news
 }

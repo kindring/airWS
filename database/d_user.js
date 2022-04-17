@@ -76,11 +76,18 @@ function register(userType,nickName,account,passwd){
     return mysql.pq(sql,values);
 }
 
+function info(type,account){
+    let sql = `select * from user where accountType = ? and account = ?`;
+    let values = [type,account];
+    return mysql.pq(sql,values);
+}
+
 module.exports =  {
     register,
     login,
     findAccountUser,
     findPhoneUser,
     changePhone,
-    changePasswd
+    changePasswd,
+    info
 }
