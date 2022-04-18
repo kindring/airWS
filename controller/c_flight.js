@@ -4,17 +4,18 @@ const db_area = require('../database/d_area')
 const handle = require('../until/handle')
 const field = require('../maps/field')
 const codeMap = require('../maps/rcodeMap')
-
+const str_action = require('../until/string_action')
+let offsetTime = 7 * 24 * 60 * 60;
 /**
  * 用户查询指定出发时间的航班
  * @param departureCity 出发城市
  * @param targetCity 目标城市
- * @param routeType 航线类型
+ * @param flightState 航线类型
  * @param startUnixTime 起飞时间开始
  * @param endUnixTime 起飞时间结束
  * @returns {Promise<*>}
  */
-async function searchFlight(departureCity,targetCity,routeType,startUnixTime,endUnixTime){
+async function searchFlight(departureCity,targetCity,flightState,startUnixTime,endUnixTime){
     let [err,result] = await handle(db_air.flightSearch(...arguments));
     if(err){throw err}
     return result;
@@ -45,6 +46,24 @@ async function flightInfo(flightId){
     return result[0];
 }
 
+async function searchFlights(state,options,page,limie){
+    console.log(options);
+    let searchItems = {
+        departureCity:options.departureCity,
+        targetCity:options.targetCity,
+        startTime:options.startTime?(options.startTime-0)/1000:((new Date().getTime()-0)/1000),
+        endTime:options.endTime?(options.endTime-0)/1000:((new Date().getTime()-0)/1000)+offsetTime,
+        flightState: state,
+        routeType: options.routeType,
+        isLate: options.isLate,
+        startPrice: options.startPrice,
+        endPrice: options.endPrice,
+    }
+    let [err,result] = await handle(db_air.searchFlights(searchItems));
+    if(err){throw err}
+    console.log(result)
+    return result;
+}
 
 /**
  * 新增航班
@@ -181,5 +200,6 @@ module.exports = {
     addFlight,
     updateFlight,
     flightInfo,
-    news
+    news,
+    searchFlights
 }

@@ -36,7 +36,7 @@ router.post('/search',
         let params = [
              req.body.departure,
              req.body.target,
-             req.body.routeType,
+             req.body.flightState,
              req.body.startTime,
              req.body.endTime,
         ]
@@ -178,6 +178,49 @@ router.get('/news',async (req,res)=>{
     }
 })
 
+
+router.post('/sells',
+    paramsCheck({
+        post:{
+            departureCity:{required:true},
+            targetCity:{required:true},
+        }
+    }),
+    async (req,res)=>{
+        try{
+            let results = await c_flight.searchFlights(field.flightState_sail,req.body);
+            res.json({
+                rcode: code.ok,
+                data: results
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+    })
+router.get('/sellist',
+    async (req,res)=>{
+        try{
+            let results = await c_flight.searchFlights(field.flightState_sail, {});
+            res.json({
+                rcode: code.ok,
+                data: results
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+    });
 router.post('/state',
     checkLogin(field.adminType),
     paramsCheck({

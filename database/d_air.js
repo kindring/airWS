@@ -5,6 +5,7 @@ const {getUnixTimeStamp} = require("../until/time");
 const code = require("../maps/rcodeMap");
 const fields = require("../maps/field");
 const checkArgumentsIsEmpty = require("../until/checkArgumentsIsEmpty");
+const {loadFlights} = require("./d_recommend");
 // 查询指定城市航班
 
 
@@ -17,7 +18,7 @@ const checkArgumentsIsEmpty = require("../until/checkArgumentsIsEmpty");
  * @param [endUnixTime] 出发时间截止,某个时间段内的
  * @returns {Promise | Promise<unknown>}
  */
-function flightSearch(departureCity,targetCity,routeType,startUnixTime,endUnixTime){
+function flightSearch(departureCity,targetCity,flightState,startUnixTime,endUnixTime){
     let sql=``,values=[];
     sql = `select f.id,f.originalPrice,f.currentPrice,f.sailingTime,f.langdinTime ,dep.cityname as departureCityName,tar.cityname as targetCityName
             from
@@ -68,9 +69,12 @@ function flightList(){
  */
 function flightInfo(flightId){
     let sql=``,values=[];
-    sql+=`select ff.*,count(flightId = ? or null) as pay
+    sql+=`select ff.*,count(flightId = ? or null) as pay,
+            dep.cityname as departureCityName,tar.cityname as targetCityName
             from 
-            (select * from flight where id = ?) as ff,
+            (select * from flight where id = ?) as ff
+            LEFT JOIN (select id,cityName from area ) as dep on dep.id = ff.departureCity
+            LEFT JOIN (select id,cityName from area ) as tar on tar.id = ff.targetCity,
             airTickets;`
     values.push(flightId,flightId)
     return mysql.pq(sql,values);
@@ -163,6 +167,64 @@ function recommendFlight(){
 
 }
 
+
+/**
+ *
+ * @param searchItems
+ * @param cityName
+ * @param page
+ * @param limit
+ * @returns {Promise | Promise<unknown>}
+ */
+function searchFlights(searchItems,cityName = true,page = 1,limit){
+    let sql=`select`,values=[];
+    if(cityName){
+        sql+=' f.*,dep.cityname as departureCityName,tar.cityname as targetCityName'
+        sql+=` from
+            flight as f
+            LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity
+            LEFT JOIN (select id,cityName from area ) as tar on tar.id = f.targetCity`
+    }else{
+        sql+=' f.*';
+        sql+=` from
+            flight as f`;
+    }
+    sql+=' where '
+    // 根据类型
+    let fields = Object.keys(searchItems);
+    fields = fields.filter(field=>searchItems[field])
+    if(fields.length<1){
+        throw {rcode:code.notParam}
+    }
+    for(let field of fields){
+        // console.log(`${field} : ${searchItems[field]}`)
+        if(!searchItems[field]){
+            continue;
+        }
+
+            if(values.length>=1)sql += ' and';
+            if(field === 'startTime'){
+                sql+=` f.sailingTime >= ?`
+            }else if(field === 'endTime'){
+                sql+=` f.sailingTime <= ?`
+            }else if(field === 'startPrice'){
+                sql+=` f.currentPrice >= ?`
+            }else if(field === 'endPrice'){
+                sql+=` f.currentPrice <= ?`
+            }else{
+                sql+=` f.${field} ${searchItems[field].action||'='} ?`
+            }
+            values.push(searchItems[field]);
+
+    }
+    sql+=' order by createTime desc'
+    if(limit){
+        sql+=` limit ?,?;`
+        values.push((page-1)*limit,limit)
+    }
+    sql+=';'
+    return mysql.pq(sql,values);
+}
 /**
  * 售票的航班信息
  * @param num
@@ -207,5 +269,6 @@ module.exports = {
     flightList,
     flightInfo,
     wicketFlights,
+    searchFlights,
     sellFlights
 }
