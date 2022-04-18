@@ -153,6 +153,7 @@ async function updateFlight(flightId,updateOption){
     updateOptions.totalVotes = updateOption.totalVotes;
     updateOptions.departureCity = updateOption.departureCity;
     updateOptions.targetCity = updateOption.targetCity;
+    updateOptions.flightState = updateOption.flightState;
     [err,result] = await handle(db_air.updateFlight(flightId,updateOptions));
     if(err) throw err;
     return result
@@ -164,12 +165,12 @@ async function updateFlight(flightId,updateOption){
  * @returns {Promise<void>}
  */
 async function news(nums){
-    let result = {},sailFlights,wicketFlights;
+    let result = {},sellFlights,wicketFlights;
     [err,wicketFlights] = await handle(db_air.wicketFlights(nums));
     if(err){throw err}
-    [err,sailFlights] = await handle(db_air.sailFlights(nums));
+    [err,sellFlights] = await handle(db_air.sellFlights(nums));
     if(err){throw err}
-    result.sailFlights = sailFlights;
+    result.sellFlights = sellFlights;
     result.wicketFlights = wicketFlights;
     return result;
 }

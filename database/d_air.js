@@ -168,7 +168,7 @@ function recommendFlight(){
  * @param num
  * @returns {Promise<unknown>}
  */
-function sailFlights(num = 5){
+function sellFlights(num = 5){
     let sql=``,values=[];
     // 判断状态为
     sql+=`select f.id,f.currentPrice,f.sailingTime,f.langdinTime,dep.cityname as departureCityName,tar.cityname as targetCityName
@@ -207,5 +207,5 @@ module.exports = {
     flightList,
     flightInfo,
     wicketFlights,
-    sailFlights
+    sellFlights
 }

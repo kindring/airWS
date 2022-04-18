@@ -177,4 +177,33 @@ router.get('/news',async (req,res)=>{
         });
     }
 })
+
+router.post('/state',
+    checkLogin(field.adminType),
+    paramsCheck({
+        post:{
+            flightId:{required:true},
+            nextState:{required:true},
+        }
+    }),
+    async (req,res)=>{
+        try{
+            let results = await c_flight.updateFlight(req.body.flightId, {
+                flightState:req.body.nextState
+            });
+            res.json({
+                rcode: code.ok,
+                data: results
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+})
+
 module.exports = router;
