@@ -75,7 +75,8 @@ function flightInfo(flightId){
             (select * from flight where id = ?) as ff
             LEFT JOIN (select id,cityName from area ) as dep on dep.id = ff.departureCity
             LEFT JOIN (select id,cityName from area ) as tar on tar.id = ff.targetCity,
-            airTickets;`
+            airTickets as t 
+            where t.payState != '1' and t.payState != '4';`
     values.push(flightId,flightId)
     return mysql.pq(sql,values);
 }
@@ -90,7 +91,8 @@ function flightTicks(flightId){
     sql=`select ff.*,count(t.flightId = ? or null) as pay
             from 
             (select totalVotes from flight where id = ?) as ff,
-            airTickets as t`;
+            airTickets as t 
+            where t.payState != '1' and t.payState != '4'`;
     values.push(flightId,flightId);
     return mysql.pq(sql,values);
 }

@@ -54,7 +54,7 @@
 | id       | int     | pk | n   | id |
 | flightId | int | pk | n   | 航班id |
 | userId | int | pk | n   | 用户id |
-| payState | char | 1 | 1(创建,待支付),2(已经支付),3(进行中),4(取消) | 机票状态|
+| payState | char | 1 | 1(创建,待支付),2(已经支付),3(订单结束,航班已经到站),4(取消) | 机票状态|
 | createTime | date | now | now | 创建时间 |
 | payTime | date | null | null | 支付时间 |
 
