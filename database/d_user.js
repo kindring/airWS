@@ -82,6 +82,19 @@ function info(type,account){
     return mysql.pq(sql,values);
 }
 
+function cars(id){
+    let sql = ``,values = [];
+    sql = `select c.*,f.flightState,f.currentPrice,f.sailingTime,f.langdinTime,dep.cityname as departureCityName,tar.cityname as targetCityName
+            from
+            flight as f
+            inner JOIN (select * from car ) as c on c.flightId = f.id
+            LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity
+            LEFT JOIN (select id,cityName from area ) as tar on tar.id = f.targetCity
+            where c.userId = ?;`
+    values.push(id);
+    return mysql.pq(sql,values);
+}
+
 module.exports =  {
     register,
     login,
@@ -89,5 +102,6 @@ module.exports =  {
     findPhoneUser,
     changePhone,
     changePasswd,
-    info
+    info,
+    cars
 }

@@ -65,7 +65,7 @@ router.post('/login',
     }),
     async(req,res)=>{
       try{
-        if (req.body.captcha.toLowerCase() != req.session.captcha) return res.json({...result, msg: `验证码错误,captcha error` });
+        if (req.body.captcha.toLowerCase() != req.session.captcha) return res.json({rcode: code.customError, msg: `验证码错误,captcha error` });
         let results = await c_user.login(fields.userType,req.body.account,req.body.passwd);
         req.session[progress.userSessionField] = results;
         res.json({

@@ -109,12 +109,33 @@ async function info(type,account){
     return result[0];
 }
 
+/**
+ * 获取用户购物车
+ * @param account 用户账号
+ * @returns {Promise<*>}
+ */
+async function cars(account){
+    // 根据账号查找id
+    let [err,result] = await handle(db_user.findAccountUser(userType,account));
+    if(err)throw err;
+    if(result.length < 1){
+        throw {rcode:codeMap.notFound,msg:'无法找到账户'}
+    }
+    [err,result] = await handle(db_user.cars(result[0].id));
+    if(err)throw err;
+    // 注册成功
+    return result;
+}
+
+
+
 module.exports = {
     register,
     changePhone,
     changePasswd,
     checkAccount,
     login,
-    info
+    info,
+    cars
 }
 
