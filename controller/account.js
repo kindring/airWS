@@ -1,4 +1,5 @@
 const db_user = require('../database/d_user')
+const d_air = require('../database/d_air')
 const handle = require('../until/handle')
 const field = require('../maps/field')
 const codeMap = require('../maps/rcodeMap')
@@ -128,6 +129,36 @@ async function cars(account){
 }
 
 
+async function removeCar(carId){
+    let [err,result] = await handle(db_user.removeCar(carId));
+    if(err)throw err;
+    return result;
+}
+
+async function addCar(flightId,account){
+    let userId;
+    // 根据账号查找id
+    let [err,result] = await handle(db_user.findAccountUser(userType,account));
+    if(err)throw err;
+    if(result.length < 1){
+        throw {rcode:codeMap.notFound,msg:'无法找到账户'}
+    }
+    userId = result[0].id;
+    // 查看航班是否已经结束
+    [err,result] = await handle(d_air.flightInfo(flightId));
+    if(err)throw err;
+    if(result.length < 1){
+        throw {rcode:codeMap.notFound,msg:'无法找到航班,航班号错误'}
+    }
+    console.log(result[0]);
+    if(result[0].flightState !== field.flightState_sail+''){
+        throw {rcode:codeMap.customError,msg:'航班非销售状态'}
+    }
+    // 开始添加购物车
+    [err,result] = await handle(db_user.addCar(flightId,userId));
+    if(err)throw err;
+    return result;
+}
 
 module.exports = {
     register,
@@ -136,6 +167,8 @@ module.exports = {
     checkAccount,
     login,
     info,
+    removeCar,
+    addCar,
     cars
 }
 

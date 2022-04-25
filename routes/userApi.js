@@ -66,4 +66,58 @@ router.get('/cars',checkLogin(fields.userType),async(req,res)=>{
     }
 });
 
+router.post('/car/add',
+    checkLogin(fields.userType),
+    checkParams(
+        {
+            post:{
+                flightId:{required:true}
+            }
+        }),
+    async(req,res)=>{
+        try{
+            let results = await c_user.addCar(req.body.flightId,req.session[progress.userSessionField]);
+            res.json({
+                rcode: code.ok,
+                data: results,
+                total: results.length
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+    })
+
+router.post('/car/remove',
+    checkLogin(fields.userType),
+    checkParams(
+        {
+            post:{
+                carId:{required:true}
+            }
+        }),
+   async(req,res)=>{
+        try{
+            let results = await c_user.removeCar(req.body.carId);
+            res.json({
+                rcode: code.ok,
+                data: results,
+                total: results.length
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+    })
+
 module.exports = router;

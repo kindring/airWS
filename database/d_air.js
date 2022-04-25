@@ -235,7 +235,7 @@ function searchFlights(searchItems,cityName = true,page = 1,limit){
 function sellFlights(num = 5){
     let sql=``,values=[];
     // 判断状态为
-    sql+=`select f.id,f.currentPrice,f.sailingTime,f.langdinTime,dep.cityname as departureCityName,tar.cityname as targetCityName
+    sql+=`select f.id,f.currentPrice,f.sailingTime,f.langdinTime,f.flightState,dep.cityname as departureCityName,tar.cityname as targetCityName
             from
             flight as f
             LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity
@@ -253,7 +253,7 @@ function sellFlights(num = 5){
 function wicketFlights(num = 5){
     let sql=``,values=[];
     // 判断状态为
-    sql+=`select f.id,f.currentPrice,f.sailingTime,f.langdinTime,f.createTime,dep.cityname as departureCityName,tar.cityname as targetCityName
+    sql+=`select f.id,f.currentPrice,f.sailingTime,f.langdinTime,f.flightState,f.createTime,dep.cityname as departureCityName,tar.cityname as targetCityName
             from
             flight as f
             LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity

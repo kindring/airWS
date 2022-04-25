@@ -95,6 +95,24 @@ function cars(id){
     return mysql.pq(sql,values);
 }
 
+
+function addCar(flightId,userId){
+    let sql = `insert into car(flightId,userId) values(?,?)`;
+    let values = [flightId,userId];
+    return mysql.pq(sql,values);
+}
+
+/**
+ * 移除购物车的指定行 根据id
+ * @param carId 要删除的id
+ * @returns {Promise<unknown>}
+ */
+function removeCar(carId){
+    let sql = `delete from car where id = ?`;
+    let values = [carId];
+    return mysql.pq(sql,values);
+}
+
 module.exports =  {
     register,
     login,
@@ -103,5 +121,7 @@ module.exports =  {
     changePhone,
     changePasswd,
     info,
-    cars
+    cars,
+    removeCar,
+    addCar
 }
