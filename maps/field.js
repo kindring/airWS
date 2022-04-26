@@ -21,4 +21,7 @@ module.exports = {
     flightState_sail: 1,
     // 航班检票状态
     flightState_wicket:2,
+    // 设置
+    travelState_isDefault: 1,
+    travelState_notDefault: 2,
 }

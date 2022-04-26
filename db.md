@@ -22,6 +22,16 @@
 | accountState | char | 1   | 账号状态,封禁 |
 | createTime | date | now | 创建时间  |
 
+## 乘机人 travel
+| 字段  | 类型  | 默认值 | 可选值| 备注    |
+|-----|-----|-----|---|-------|
+| id | int | | | |
+| userId | int | | | 用户id |
+| name | varchar | '' | '' | 乘机人名字 |
+| phone | varchar | '' |'' | 手机号 |
+| card | varchar | '' |'' | 乘机人身份证 |
+| default | char(2) | 1 | 1默认 2非默认 |是否为默认 |
+
 ## 地区表 area
 | 字段        | 类型      | 默认值  | 可选值 | 备注  |
 |-----------|---------|------|----|-----|
@@ -31,32 +41,49 @@
 | cityState | int     | 1    | 1启用2封禁 | 封禁 |
 
 
+## 飞机表 air
+| 字段           | 类型      | 默认值 | 可选值                      | 备注     |
+|--------------|---------|-----|--------------------------|--------|
+| id | int | pk | n | id |
+| airCode | varcahr | 255 | '' | 飞机名称 |
+| row | int | 1 | 15 | 一共有多少排 |
+| col | int | 1 | 5 | 一排几个座位 |
+
 ## 航班表flight(管理员通过航线创建航班),需要输入价格和指定飞机和起飞时间
 | 字段           | 类型      | 默认值 | 可选值                      | 备注     |
 |--------------|---------|-----|--------------------------|--------|
 | id           | int     | pk  | n                        | id     |
+| airId  | varcahr | 755 | s                        | 飞机代号   |
 | originalPrice | floor   | 1   | 0-99999                  | 原始机票价格 |
 | currentPrice | floor   | 1   | 0-99999                  | 当前机票价格 |
 | sailingTime  | varcahr    | 0 | 0                      | 起飞时间,unix时间戳   |
 | langdinTime  | varcahr    | 0 | 0                     | 到站时间,unix时间戳   |
-| airCode  | varcahr | 755 | s                        | 飞机代号   |
 | flightState  | char    | 1   | 1(售票),2(值机),3(飞行中),4(结束) | 航班状态   |
 | lateState    | cahr    | 1   | 1(正点),2(晚点)              | 航班晚点状态 |
-| totalVotes   | int | 3   | 1-200                    | 售卖总票数  |
 | routeType    | char | 1 | 1(国内),2(国际) | 航线类型,是否为跨国航线,程序自动生成 | 
 | departureCity | int  | null | n           | 出发城市          |
 | targetCity   | int  | null | n           | 目标城市          |
 | flightName   | varchar | '' | '' | 航班名称 | 
+
+## 订单表 orders 
+| 字段       | 类型      | 默认值 | 可选值 | 备注                  |
+|----------|---------|----|-----|---------------------|
+| id       | int     | pk | n   | id |
+| payState | char | 1 | 1(创建,待支付),2(已经支付),3(等待值机,值机后不允许进行),3(订单结束,航班已经到站),4(取消),5(已经退款) | 机票状态|
+| userId | int | pk | n   | 用户id |
+| flightId | int | pk | n | 航班id |
+| createTime | date | now | now | 创建时间 |
+| payTime | date | null | null | 支付时间 |
+
 
 ## 机票表 airTickets
 | 字段       | 类型      | 默认值 | 可选值 | 备注                  |
 |----------|---------|----|-----|---------------------|
 | id       | int     | pk | n   | id |
 | flightId | int | pk | n   | 航班id |
-| userId | int | pk | n   | 用户id |
-| payState | char | 1 | 1(创建,待支付),2(已经支付),3(订单结束,航班已经到站),4(取消),5(已经退款) | 机票状态|
 | createTime | date | now | now | 创建时间 |
 | payTime | date | null | null | 支付时间 |
+
 
 ## 购物车 car
 | 字段       | 类型      | 默认值 | 可选值 | 备注                  |

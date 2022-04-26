@@ -1,5 +1,6 @@
 const mysql = require('./mysql');
-
+const fields = require("../maps/field")
+const code = require("../maps/rcodeMap");
 /**
  * 查找是否有指定用户名的账户
  * @param userType 用户类型
@@ -117,6 +118,83 @@ function addCar(flightId,userId){
 }
 
 /**
+ * 添加乘机人
+ * @param userId
+ * @param name
+ * @param card
+ * @param phone
+ * @param defaultState
+ * @returns {Promise | Promise<unknown>}
+ */
+function addTravel(userId,name,card,phone,defaultState){
+    let sql = `insert into travel(userId,name,card,phone,default) values(?,?,?,?,?)`;
+    let values = [userId,name,card,phone,defaultState];
+    return mysql.pq(sql,values);
+}
+// 获取乘机人
+function travels(userId){
+    let sql = `select * from travel where userId = ?`;
+    let values = [userId];
+    return mysql.pq(sql,values);
+}
+
+/**
+ * 修改指定用户的所有状态
+ * @param userId
+ * @param travelState
+ * @returns {Promise | Promise<unknown>}
+ */
+function changeAllTravelState(userId,travelState = fields.travelState_notDefault){
+    let sql = `update travel set default = ? where userId = ?`;
+    let values = [travelState,userId];
+    return mysql.pq(sql,values);
+}
+
+/**
+ * 修改指定乘机人的信息
+ * @param travelId
+ * @param params
+ * @returns {Promise | Promise<unknown>}
+ */
+function changeTravel(travelId,params){
+    let sql=`update travel set`,values=[];
+    let fields = Object.keys(params);
+    fields = fields.filter(field=>params[field])
+    if(fields.length<1){
+        throw {rcode:code.notParam}
+    }
+    for(let field of fields) {
+        // console.log(`${field} : ${searchItems[field]}`)
+        if (!params[field]) {
+            continue;
+        }
+        sql+=` ${field} = ?`
+        values.push(params[field])
+    }
+    sql+=` where id=?`;
+    values.push(travelId)
+    // let sql = `update travel set default = ? where userId = ?`;
+    // let values = [travelState,userId];
+    return mysql.pq(sql,values);
+}
+
+// 修改乘机人
+function removeTravel(travelId,name,card,phone,defaultState){
+    let sql = `delete from travel where id = ?`;
+    let values = [travelId];
+    return mysql.pq(sql,values);
+}
+
+
+// 修改乘机人
+function travelInfo(travelId){
+    let sql = `select * from travel where id = ?`;
+    let values = [travelId];
+    return mysql.pq(sql,values);
+}
+
+
+/**
  * 移除购物车的指定行 根据id
  * @param carId 要删除的id
  * @returns {Promise<unknown>}
@@ -138,5 +216,11 @@ module.exports =  {
     cars,
     removeCar,
     addCar,
-    findCar
+    findCar,
+    removeTravel,
+    addTravel,
+    travels,
+    travelInfo,
+    changeAllTravelState,
+    changeTravel
 }

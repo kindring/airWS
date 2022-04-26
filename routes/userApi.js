@@ -146,4 +146,62 @@ router.post('/car/remove',
         }
     })
 
+
+router.post('/travel/remove',
+    checkLogin(fields.userType),
+    checkParams(
+        {
+            post:{
+                travelId:{required:true}
+            }
+        }),
+    async(req,res)=>{
+        try{
+            let results = await c_user.removeTravel(req.body.travelId);
+            res.json({
+                rcode: code.ok,
+                data: results,
+                total: results.length
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+    })
+
+router.post('/travel/add',
+    checkLogin(fields.userType),
+    checkParams(
+        {
+            post:{
+                name:{required:true},
+                card:{required:true},
+                phone:{required:true},
+                isDefault:{required:true},
+            }
+        }),
+    async(req,res)=>{
+        try{
+            let results = await c_user.addTravel(req.body.travelId);
+            res.json({
+                rcode: code.ok,
+                data: results,
+                total: results.length
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+    })
+
 module.exports = router;

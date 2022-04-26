@@ -135,6 +135,105 @@ async function removeCar(carId){
     return result;
 }
 
+/**
+ * 移除乘机人
+ * @param travelId
+ * @returns {Promise<*>}
+ */
+async function removeTravel(travelId){
+    let [err,result] = await handle(db_user.removeTravel(travelId));
+    if(err)throw err;
+    return result;
+}
+
+/**
+ * 添加乘机人
+ * @param name 乘机人名
+ * @param card 身份证号
+ * @param phone 手机号
+ * @param account 登陆账号
+ * @param isDefault 是否为默认
+ * @returns {Promise<*>}
+ */
+async function addTravel(name,card,phone,account,isDefault = field.travelState_isDefault){
+    let userId;
+    // 根据账号查找id
+    let [err,result] = await handle(db_user.findAccountUser(userType,account));
+    if(err)throw err;
+    if(result.length < 1){
+        throw {rcode:codeMap.notFound,msg:'无法找到账户'}
+    }
+    userId = result[0].id;
+    [err,result] = await handle(db_user.changeAllTravelState(userId,field.travelState_notDefault));
+    if(err)throw err;
+    // 开始添加购物车
+    [err,result] = await handle(db_user.addTravel(userId,name,card,phone,isDefault));
+    if(err)throw err;
+    return result;
+}
+
+async function updateTravel(account,travelId,params){
+    // 根据账号查找id
+    let [err,result] = await handle(db_user.findAccountUser(userType,account));
+    if(err)throw err;
+    if(result.length < 1){
+        throw {rcode:codeMap.notFound,msg:'无法找到账户'}
+    }
+    [err,result] = await handle(db_user.changeTravel(travelId,{
+        card:params.card,
+        phone:params.phone,
+        default:params.default
+    }));
+    if(err)throw err;
+
+    // 查找成功
+    return result;
+}
+
+/**
+ * 查找所有的乘机人
+ * @param account
+ * @returns {Promise<*>}
+ */
+async function travels(account){
+    // 根据账号查找id
+    let [err,result] = await handle(db_user.findAccountUser(userType,account));
+    if(err)throw err;
+    if(result.length < 1){
+        throw {rcode:codeMap.notFound,msg:'无法找到账户'}
+    }
+    [err,result] = await handle(db_user.travels(result[0].id));
+    if(err)throw err;
+
+    // 查找成功
+    return result.map(val=>{
+        let card = val.card.replace(val.card.substr(4,10),'**********')
+        return {
+            ...val,
+            card:card
+        }
+    });
+}
+
+/**
+ * 乘机人详细信息
+ * @param account
+ * @param passwd
+ * @param travelId
+ * @returns {Promise<*>}
+ */
+async function travelInfo(account,passwd,travelId){
+    // 根据账号查找id
+    let [err,result] = await handle(db_user.login(userType,account,passwd));
+    if(err)throw err;
+    if(result.length < 1){
+        throw {rcode:codeMap.notFound,msg:'无法找到账户'}
+    }
+    [err,result] = await handle(db_user.travelInfo(travelId));
+    if(err)throw err;
+    return result;
+}
+
 async function addCar(flightId,account){
     let userId;
     // 根据账号查找id
@@ -174,6 +273,11 @@ module.exports = {
     info,
     removeCar,
     addCar,
-    cars
+    cars,
+    removeTravel,
+    addTravel,
+    travels,
+    travelInfo,
+    updateTravel
 }
 
