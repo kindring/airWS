@@ -82,7 +82,21 @@ function info(type,account){
     return mysql.pq(sql,values);
 }
 
-function cars(id){
+
+function findCar(userId,flightId){
+    let sql = ``,values = [];
+    sql = `select c.*,f.flightState,f.currentPrice,f.sailingTime,f.langdinTime,dep.cityname as departureCityName,tar.cityname as targetCityName
+            from
+            flight as f
+            inner JOIN (select * from car ) as c on c.flightId = f.id
+            LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity
+            LEFT JOIN (select id,cityName from area ) as tar on tar.id = f.targetCity
+            where c.userId = ? and flightId = ?;`
+    values.push(userId,flightId);
+    return mysql.pq(sql,values);
+}
+
+function cars(userId){
     let sql = ``,values = [];
     sql = `select c.*,f.flightState,f.currentPrice,f.sailingTime,f.langdinTime,dep.cityname as departureCityName,tar.cityname as targetCityName
             from
@@ -91,7 +105,7 @@ function cars(id){
             LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity
             LEFT JOIN (select id,cityName from area ) as tar on tar.id = f.targetCity
             where c.userId = ?;`
-    values.push(id);
+    values.push(userId);
     return mysql.pq(sql,values);
 }
 
@@ -123,5 +137,6 @@ module.exports =  {
     info,
     cars,
     removeCar,
-    addCar
+    addCar,
+    findCar
 }

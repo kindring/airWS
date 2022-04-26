@@ -30,6 +30,32 @@ router.get('/check',
         }
 })
 // 获取用户信息
+router.post('/changePhone',
+    checkLogin(fields.userType),
+    checkParams(
+    {
+        post:{
+            phone:{required:true},
+            passwd:{required:true}
+        }
+    }),async(req,res)=>{
+    try{
+        let results = await c_user.changePhone(fields.userType,req.session[progress.userSessionField],req.body.passwd,req.body.phone);
+        res.json({
+            rcode: code.ok,
+            data: results
+        })
+    }catch (error) {
+        if (error.rcode !== code.customError) {
+            console.log(error);
+        }
+        res.json({
+            rcode: error.rcode || code.serverError,
+            msg: error.msg || error.message
+        });
+    }
+});
+// 获取用户信息
 router.get('/info',checkLogin(fields.userType),async(req,res)=>{
     try{
         let results = await c_user.info(fields.userType,req.session[progress.userSessionField]);

@@ -154,6 +154,11 @@ async function addCar(flightId,account){
     if(result[0].flightState !== field.flightState_sail+''){
         throw {rcode:codeMap.customError,msg:'航班非销售状态'}
     }
+    [err,result] = await handle(db_user.findCar(userId,flightId));
+    if(err)throw err;
+    if(result.length >= 1){
+        throw {rcode:codeMap.customError,msg:'该航班已经在购物车中'}
+    }
     // 开始添加购物车
     [err,result] = await handle(db_user.addCar(flightId,userId));
     if(err)throw err;
