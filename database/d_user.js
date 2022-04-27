@@ -264,6 +264,32 @@ function waitPayOrder(){
     return mysql.pq(sql,values);
 }
 
+/**
+ * 修改订单信息
+ * @param orderId
+ * @param params
+ * @returns {Promise | Promise<unknown>}
+ */
+function changeOrder(orderId,params){
+    let sql=`update orders set`,values=[];
+    let fields = Object.keys(params);
+    fields = fields.filter(field=>params[field])
+    if(fields.length<1){
+        throw {rcode:code.notParam}
+    }
+    for(let field of fields) {
+        if (!params[field]) {
+            continue;
+        }
+        if(values.length>0){sql+=','}
+        sql+=` \`${field}\` = ?`
+        values.push(params[field])
+    }
+    sql+=` where id=?`;
+    values.push(orderId)
+    return mysql.pq(sql,values);
+}
+
 module.exports =  {
     register,
     login,
@@ -282,5 +308,7 @@ module.exports =  {
     travelInfo,
     changeAllTravelState,
     changeTravel,
-    waitPayOrder
+    waitPayOrder,
+    changeOrder,
+    payOrder
 }

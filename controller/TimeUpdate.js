@@ -2,27 +2,65 @@
 const {getUnixTimeStamp} = require('../until/time')
 const db_user = require('../database/d_user')
 const handle = require("../until/handle");
+const {payState_cancel} = require("../maps/field");
 let orders = [];
-
+let payLock = false;
 // 订单超过15分钟的自动过期
 let expire = 60 * 15;
 let timerHandle = null;
 
-// 每隔5秒遍历一次数据
-async function loadOrders(now,){
+
+function tick (t,fn){
+    setTimeout(async ()=>{
+        await fn();
+        tick(t,fn);
+    },t)
+}
+
+
+async function check(){
+    if(payLock){
+        return;
+    }
+    let nowUnix = getUnixTimeStamp();
+    for (let i = 0; i < orders.length; i++) {
+        let order = orders[i];
+        if(!order){
+            break;
+        }
+        if(nowUnix>order.endTime){
+            let [err,result] = await handle(db_user.changeOrder(order.id,{payState:payState_cancel}));
+            if(err){console.log(err)}
+            console.log(`订单${order.id},超时过期`);
+        }
+    }
+}
+
+async function main(){
     let [err,result] = await handle(db_user.waitPayOrder());
+    if(err){
+        console.log('获取用户数据失败')
+        console.error(err);
+    }
+    orders = result.map(order=>{
+        return {
+            id: order.id,
+            endTime: order.createTime + expire
+        }
+    });
+    tick(1000,check);
 }
 
-async function tick (){
+main();
 
+console.log('检测订单');
+
+async function payOrder(orderId){
+    payLock=true;
+    let [err,result] = await handle(db_user.payOrder(orderId));
+    if(err){console.log(err)}
 
 }
 
 
-function check(order){
 
-}
-
-
-console.log('检测订单')
-tick();
