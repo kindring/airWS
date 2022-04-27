@@ -18,6 +18,7 @@ let offsetTime = 7 * 24 * 60 * 60;
 async function searchFlight(departureCity,targetCity,flightState,startUnixTime,endUnixTime){
     let [err,result] = await handle(db_air.flightSearch(...arguments));
     if(err){throw err}
+
     return result;
 }
 
@@ -43,7 +44,22 @@ async function flightInfo(flightId){
     if(!result.length){
         throw {rcode:codeMap.notFound,msg:'无法找到航班'}
     }
-    return result[0];
+    let flight = result[0];
+    flight.maxTotalVotes = parseInt(flight.col) * parseInt(flight.row);
+    // 查找已经售出数量
+    [err,result] = await handle(db_air.flightOrder(flightId));
+    if(err){throw err}
+    let sold = result.reduce((acc,val)=>{
+        // 查看是否有部分退票
+        let ticketNum = parseInt(val.ticketNum);
+        let refundTick = 0;
+        if(val.refundTick){
+            refundTick =  val.refundTick.split(',').length;
+        }
+        return acc+(ticketNum - refundTick)
+    },0)
+    flight.pay = sold;
+    return flight;
 }
 
 async function searchFlights(state,options,page,limie){
@@ -79,13 +95,13 @@ async function searchFlights(state,options,page,limie){
  * @returns {Promise<*>}
  */
 async function addFlight(
-    flightName,airCode,
+    flightName,airId,
     originalPrice,currentPrice,
     sailingTime,langdinTime,
     totalVotes,departureCity,targetCity){
     let err,result,departCityType,targetCityType,routerType;
     // 检查参数
-    if(!flightName||!airCode||!originalPrice||!currentPrice||!sailingTime||!langdinTime||!totalVotes||!departureCity||!targetCity){
+    if(!flightName||!airId||!originalPrice||!currentPrice||!sailingTime||!langdinTime||!totalVotes||!departureCity||!targetCity){
         throw {rcode:codeMap.notParam,msg:``}
     }
     // 判断时间是否合法
@@ -111,7 +127,7 @@ async function addFlight(
     if(err){throw err}
     [err,result] = await handle(db_air.addFlight(
         flightName,
-        airCode,
+        airId,
         originalPrice,
         currentPrice,
         sailingTime,
@@ -164,7 +180,7 @@ async function updateFlight(flightId,updateOption){
         updateOptions.routeType = routerType;
     }
     updateOptions.flightName = updateOption.flightName;
-    updateOptions.airCode = updateOption.airCode;
+    updateOptions.airId = updateOption.airId;
     updateOptions.originalPrice = updateOption.originalPrice;
     updateOptions.currentPrice = updateOption.currentPrice;
     updateOptions.sailingTime = updateOption.sailingTime;
@@ -194,6 +210,41 @@ async function news(nums){
     return result;
 }
 
+/**
+ * 新增飞机
+ * @param airCode
+ * @param row
+ * @param col
+ * @returns {Promise<*>}
+ */
+async function addAir(airCode,row,col){
+    let [err,result] = await handle(db_air.addAir(airCode,row,col));
+    if(err){throw err}
+    return result;
+}
+
+/**
+ * 飞机列表
+ * @param state
+ * @returns {Promise<*>}
+ */
+async function airs(state){
+    let [err,result] = await handle(db_air.airs(state));
+    if(err){throw err}
+    return result;
+}
+
+async function updateAir(airId,updateParam){
+    let param = {
+        airCode:updateParam.airCode,
+        col:updateParam.col,
+        row:updateParam.row,
+    }
+    let [err,result] = await handle(db_air.updateAir(airId,param));
+    if(err){throw err}
+    return result;
+}
+
 module.exports = {
     searchFlight,
     flightList,
@@ -201,5 +252,8 @@ module.exports = {
     updateFlight,
     flightInfo,
     news,
-    searchFlights
+    searchFlights,
+    addAir,
+    airs,
+    updateAir
 }

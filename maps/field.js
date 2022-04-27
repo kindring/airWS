@@ -24,4 +24,18 @@ module.exports = {
     // 设置
     travelState_isDefault: 1,
     travelState_notDefault: 2,
+    // 未删除的乘机人
+    travelDelete_notDelete: 2,
+    // 订单已经创建,暂时未支付
+    payState_create: 1,
+    // 已经支付
+    payState_pay: 2,
+    // 订单结束
+    payState_end: 3,
+    // 订单取消
+    payState_cancel: 4,
+    // 全部退款
+    payState_refund: 5,
+    // 部分机票退款
+    payState_rebates: 6,
 }

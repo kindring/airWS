@@ -133,8 +133,8 @@ function addTravel(userId,name,card,phone,defaultState){
 }
 // 获取乘机人
 function travels(userId){
-    let sql = `select * from travel where userId = ?`;
-    let values = [userId];
+    let sql = `select * from travel where userId = ? and delete = ?`;
+    let values = [userId,fields.travelDelete_notDelete];
     return mysql.pq(sql,values);
 }
 
@@ -168,6 +168,7 @@ function changeTravel(travelId,params){
         if (!params[field]) {
             continue;
         }
+        if(values.length>0){sql+=','}
         sql+=` ${field} = ?`
         values.push(params[field])
     }
@@ -179,9 +180,9 @@ function changeTravel(travelId,params){
 }
 
 // 修改乘机人
-function removeTravel(travelId,name,card,phone,defaultState){
-    let sql = `delete from travel where id = ?`;
-    let values = [travelId];
+function removeTravel(travelId){
+    let sql = `update travel set travel.delete = ? where travelId =?`;
+    let values = [fields.travelDelete_notDelete,travelId];
     return mysql.pq(sql,values);
 }
 
@@ -205,6 +206,64 @@ function removeCar(carId){
     return mysql.pq(sql,values);
 }
 
+
+function userOrder(userId,payState){
+    let sql=``,values=[];
+    sql+=`
+        select 
+        o.*,air.airCode,
+        f.sailingTime,f.langdinTime,f.flightState,f.flightName,
+        dep.cityname as departureCityName,
+        tar.cityname as targetCityName
+        from 
+        orders as o 
+        LEFT JOIN (select * from flight ) as f on f.id = o.flightId
+        LEFT JOIN (select * from air ) as air on air.id = f.airId
+        LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity
+        LEFT JOIN (select id,cityName from area ) as tar on tar.id = f.targetCity;
+        where userId = ?
+       `
+    values.push(userId);
+    if (payState){
+        sql+=` and payState = ?`;
+        values.push(payState);
+    }
+    return mysql.pq(sql,values);
+}
+
+function addOrder(userId,flightId,travelIds,createTime){
+    let sql=``,values=[];
+    sql+=`insert into order(userId,flightId,ticketNum,travelIds,createTime)`;
+    values.push(userId,flightId);
+    values.push(travelIds.length);
+    values.push(travelIds.join(','));
+    values.push(createTime);
+    return mysql.pq(sql,values);
+}
+
+/**
+ * 用户支付订单
+ * @param orderId
+ * @returns {Promise | Promise<unknown>}
+ */
+function payOrder(orderId){
+    let sql=``,values=[];
+    sql+=`update orders set payState = ? where id = orderId`
+    values.push(fields.payState_pay,orderId);
+    return mysql.pq(sql,values);
+}
+
+/**
+ * 获取平台上所有等待支付的订单
+ * @returns {Promise | Promise<unknown>}
+ */
+function waitPayOrder(){
+    let sql=``,values=[];
+    sql+=`select * from orders where payState = ?`
+    values.push(fields.payState_create);
+    return mysql.pq(sql,values);
+}
+
 module.exports =  {
     register,
     login,
@@ -222,5 +281,6 @@ module.exports =  {
     travels,
     travelInfo,
     changeAllTravelState,
-    changeTravel
+    changeTravel,
+    waitPayOrder
 }

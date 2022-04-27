@@ -264,6 +264,11 @@ async function addCar(flightId,account){
     return result;
 }
 
+
+async function addOrder(){
+
+}
+
 module.exports = {
     register,
     changePhone,

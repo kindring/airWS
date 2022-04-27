@@ -10,26 +10,88 @@ const {loadFlights} = require("./d_recommend");
 
 
 /**
+ * 获取飞机列表
+ * @param [state] 飞机状态,默认为
+ * @returns {Promise | Promise<unknown>}
+ */
+function airs(state){
+    let sql=``,values=[];
+    sql = `select * from air`;
+    if(state == 1 || state == 2){
+        sql+= ` where state = ?`
+        values.push(state)
+    }
+    sql+=';';
+    return mysql.pq(sql,values);
+}
+
+/**
+ * 新增飞机
+ * @param airCode
+ * @param row
+ * @param col
+ * @returns {Promise | Promise<unknown>}
+ */
+function addAir(airCode,row,col){
+    let sql=``,values=[];
+    sql = `insert into air(airCode,\`row\`,col) values(?,?,?)`;
+    sql+=';';
+    values.push(...arguments);
+    return mysql.pq(sql,values);
+}
+
+/**
+ * 更新飞机
+ * @param airId 飞机id
+ * @param params 要修改的飞机信息
+ * @returns {Promise | Promise<unknown>}
+ */
+function updateAir(airId,params){
+    let sql=`update air set`,values=[];
+    let fields = Object.keys(params);
+    fields = fields.filter(field=>params[field])
+    if(fields.length<1){
+        throw {rcode:code.notParam}
+    }
+    for(let field of fields) {
+        if (!params[field]) {
+            continue;
+        }
+        if(values.length>0){sql+=','}
+        sql+=` \`${field}\` = ?`
+        values.push(params[field])
+    }
+    sql+=` where id=?`;
+    values.push(airId)
+    return mysql.pq(sql,values);
+}
+
+
+/**
  * 查询相关航班信息
  * @param departureCity 除非城市id
  * @param targetCity 目标城市id
- * @param [routeType] 航班类型,国内或者国际
+ * @param [flightState] 航班类型,国内或者国际
  * @param [startUnixTime] 出发时间开始,某个时间点之前
  * @param [endUnixTime] 出发时间截止,某个时间段内的
  * @returns {Promise | Promise<unknown>}
  */
 function flightSearch(departureCity,targetCity,flightState,startUnixTime,endUnixTime){
     let sql=``,values=[];
-    sql = `select f.id,f.originalPrice,f.currentPrice,f.sailingTime,f.langdinTime ,dep.cityname as departureCityName,tar.cityname as targetCityName
+    sql = `select 
+                f.id,f.originalPrice,f.currentPrice,f.sailingTime,f.langdinTime ,
+                air.airCode,air.row,air.col
+                dep.cityname as departureCityName,tar.cityname as targetCityName
             from
             flight as f
+            LEFT JOIN (select * from air ) as air on air.id = f.airId
             LEFT JOIN (select id,cityname from area ) as dep on dep.id = f.departureCity
             LEFT JOIN (select id,cityname from area ) as tar on tar.id = f.targetCity;
             where f.departureCity = ? and f.targetCity = ?`;
     values.push(departureCity,targetCity);
-    if(routeType){
-        sql += ` and f.routerType = ?`;
-        values.push(routeType);
+    if(flightState){
+        sql += ` and f.flightState = ?`;
+        values.push(flightState);
     }
     if(endUnixTime){
         // 如果有结束时间,没有开始时间则默认添加
@@ -54,13 +116,36 @@ function flightSearch(departureCity,targetCity,flightState,startUnixTime,endUnix
  */
 function flightList(){
     let sql=``,values=[];
-    sql=`select f.* ,dep.cityname as departureCityName,tar.cityname as targetCityName
+    sql=`select f.* ,air.airCode,air.row,air.col,dep.cityname as departureCityName,tar.cityname as targetCityName
             from
             flight as f
+            LEFT JOIN (select * from air ) as air on air.id = f.airId
             LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity
             LEFT JOIN (select id,cityName from area ) as tar on tar.id = f.targetCity;`;
     return mysql.pq(sql,values);
 }
+
+/**
+ * 查询航班对应的订单,仅限新创建以及已经支付的,以及部分退票
+ * @param flightId 航班id
+ * @returns {Promise | Promise<unknown>}
+ */
+function flightOrder(flightId){
+    let sql=``,values=[];
+    sql+=`select * from orders where flightId = ? 
+        and (payState = ? or payState = ? or payState = ?)`
+    values.push(
+        flightId,
+        fields.payState_pay,
+        fields.payState_create,
+        fields.payState_rebates
+    );
+    return mysql.pq(sql,values);
+}
+
+
+
+
 
 /**
  * 航班具体信息
@@ -69,15 +154,15 @@ function flightList(){
  */
 function flightInfo(flightId){
     let sql=``,values=[];
-    sql+=`select ff.*,count(flightId = ? or null) as pay,
-            dep.cityname as departureCityName,tar.cityname as targetCityName
-            from 
-            (select * from flight where id = ?) as ff
-            LEFT JOIN (select id,cityName from area ) as dep on dep.id = ff.departureCity
-            LEFT JOIN (select id,cityName from area ) as tar on tar.id = ff.targetCity,
-            airTickets as t 
-            where t.payState != '1' and t.payState != '4';`
-    values.push(flightId,flightId)
+    sql+=`select f.*,
+        air.airCode,air.row,air.col,
+        dep.cityname as departureCityName,tar.cityname as targetCityName
+        from 
+        (select * from flight where id = ?) as f
+        LEFT JOIN (select * from air ) as air on air.id = f.airId
+        LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity
+        LEFT JOIN (select id,cityName from area ) as tar on tar.id = f.targetCity`
+    values.push(flightId)
     return mysql.pq(sql,values);
 }
 
@@ -112,7 +197,7 @@ function flightTicks(flightId){
  * @returns {Promise<unknown>}
  */
 function addFlight(flightName,
-                   airCode,
+                   airId,
                    originalPrice,
                    currentPrice,
                    sailingTime,
@@ -123,7 +208,7 @@ function addFlight(flightName,
                    targetCity){
     let sql = ``,values = [];
     sql = `insert into flight 
-    (flightName,airCode,originalPrice,currentPrice,
+    (flightName,airId,originalPrice,currentPrice,
     sailingTime,langdinTime,
     totalVotes,routeType,
     departureCity,targetCity
@@ -272,5 +357,9 @@ module.exports = {
     flightInfo,
     wicketFlights,
     searchFlights,
-    sellFlights
+    sellFlights,
+    flightOrder,
+    airs,
+    addAir,
+    updateAir
 }

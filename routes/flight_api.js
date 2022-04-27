@@ -87,7 +87,7 @@ router.post('/add',
     paramsCheck({
         post:{
             flightName:{required:true},
-            airCode:{required:true},
+            airId:{required:true},
             originalPrice:{required:true},
             currentPrice:{required:true},
             sailingTime:{required:true},
@@ -101,7 +101,7 @@ router.post('/add',
         try{
             let results = await c_flight.addFlight(
                 req.body.flightName,
-                req.body.airCode,
+                req.body.airId,
                 req.body.originalPrice,
                 req.body.currentPrice,
                 req.body.sailingTime,
@@ -137,8 +137,6 @@ router.post('/update',
     }),
     async (req,res)=>{
         try{
-            console.log()
-
             let results = await c_flight.updateFlight(req.body.flightId, req.body.newOption);
             res.json({
                 rcode: code.ok,
@@ -248,5 +246,79 @@ router.post('/state',
             });
         }
 })
+
+router.get('/airs',
+    async (req,res)=>{
+        try{
+            let results = await c_flight.airs(req.query.state);
+            res.json({
+                rcode: code.ok,
+                data: results
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+    })
+
+router.post('/air/add',
+    checkLogin(field.adminType),
+    paramsCheck({
+        post:{
+            airCode:{required:true},
+            col:{required:true},
+            row:{required:true},
+        }
+    }),
+    async (req,res)=>{
+        try{
+            let results = await c_flight.addAir(req.body.airCode,
+                req.body.row,req.body.col);
+            res.json({
+                rcode: code.ok,
+                data: results
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+    })
+
+router.post('/air/change',
+    checkLogin(field.adminType),
+    paramsCheck({
+        post:{
+            airId:{required:true},
+            params:{required:true},
+        }
+    }),
+    async (req,res)=>{
+        try{
+            let results = await c_flight.updateAir(req.body.airId,
+                req.body.params);
+            res.json({
+                rcode: code.ok,
+                data: results
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+    })
 
 module.exports = router;
