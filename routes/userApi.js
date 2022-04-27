@@ -182,12 +182,102 @@ router.post('/travel/add',
                 name:{required:true},
                 card:{required:true},
                 phone:{required:true},
-                isDefault:{required:true},
             }
         }),
     async(req,res)=>{
         try{
-            let results = await c_user.addTravel(req.body.travelId);
+            let results = await c_user.addTravel(
+                req.body.name,
+                req.body.card,
+                req.body.phone,
+                req.session[progress.userSessionField]);
+            res.json({
+                rcode: code.ok,
+                data: results,
+                total: results.length
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+    })
+
+router.post('/travel/change',
+    checkLogin(fields.userType),
+    checkParams(
+        {
+            post:{
+                travelId:{required:true},
+                params:{required:true},
+            }
+        }),
+    async(req,res)=>{
+        try{
+            let results = await c_user.updateTravel(
+                req.session[progress.userSessionField],
+                req.body.travelId,
+                req.body.params,
+            );
+            res.json({
+                rcode: code.ok,
+                data: results,
+                total: results.length
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+    })
+
+router.post('/travel/info',
+    checkLogin(fields.userType),
+    checkParams(
+        {
+            post:{
+                travelId:{required:true},
+                passwd:{required:true},
+            }
+        }),
+    async(req,res)=>{
+        try{
+            let results = await c_user.travelInfo(
+                req.session[progress.userSessionField],
+                req.body.passwd,
+                req.body.travelId,
+            );
+            res.json({
+                rcode: code.ok,
+                data: results,
+                total: results.length
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+    })
+
+router.get('/travels',
+    checkLogin(fields.userType),
+    async(req,res)=>{
+        try{
+            let results = await c_user.travels(
+                req.session[progress.userSessionField],
+            );
             res.json({
                 rcode: code.ok,
                 data: results,

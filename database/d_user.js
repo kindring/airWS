@@ -127,17 +127,23 @@ function addCar(flightId,userId){
  * @returns {Promise | Promise<unknown>}
  */
 function addTravel(userId,name,card,phone,defaultState){
-    let sql = `insert into travel(userId,name,card,phone,default) values(?,?,?,?,?)`;
+    let sql = `insert into travel(userId,name,card,phone,\`default\`) values(?,?,?,?,?)`;
     let values = [userId,name,card,phone,defaultState];
     return mysql.pq(sql,values);
 }
 // 获取乘机人
 function travels(userId){
-    let sql = `select * from travel where userId = ? and delete = ?`;
+    let sql = `select * from travel where userId = ? and \`delete\` = ?`;
     let values = [userId,fields.travelDelete_notDelete];
     return mysql.pq(sql,values);
 }
 
+// 获取乘机人
+function findUserTravel(userId,flightId){
+    let sql = `select * from travel where userId = ? and id = ?`;
+    let values = [userId,flightId];
+    return mysql.pq(sql,values);
+}
 /**
  * 修改指定用户的所有状态
  * @param userId
@@ -145,7 +151,7 @@ function travels(userId){
  * @returns {Promise | Promise<unknown>}
  */
 function changeAllTravelState(userId,travelState = fields.travelState_notDefault){
-    let sql = `update travel set default = ? where userId = ?`;
+    let sql = `update travel set \`default\` = ? where userId = ?`;
     let values = [travelState,userId];
     return mysql.pq(sql,values);
 }
@@ -169,7 +175,7 @@ function changeTravel(travelId,params){
             continue;
         }
         if(values.length>0){sql+=','}
-        sql+=` ${field} = ?`
+        sql+=` \`${field}\` = ?`
         values.push(params[field])
     }
     sql+=` where id=?`;
@@ -305,6 +311,7 @@ module.exports =  {
     removeTravel,
     addTravel,
     travels,
+    findUserTravel,
     travelInfo,
     changeAllTravelState,
     changeTravel,

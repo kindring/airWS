@@ -45,7 +45,7 @@ async function main(){
     orders = result.map(order=>{
         return {
             id: order.id,
-            endTime: order.createTime + expire
+            endTime: parseInt(order.createTime) + expire
         }
     });
     tick(1000,check);
@@ -55,12 +55,26 @@ main();
 
 console.log('检测订单');
 
+// 用户支付订单
 async function payOrder(orderId){
     payLock=true;
     let [err,result] = await handle(db_user.payOrder(orderId));
-    if(err){console.log(err)}
-
+    if(err){payLock=false;console.log(err);throw err}
+    let ind = orders.findIndex(val=>val.id==orderId);
+    if(ind!=-1){orders[ind] = null}
+    orders = orders.filter(val=>val);
+    payLock=false;
 }
 
+async function addOrder(orderId,createTime){
+    orders.push({
+        id: orderId,
+        endTime: parseInt(createTime) + expire
+    })
+}
 
+module.exports = {
+    payOrder,
+    addOrder,
+}
 
