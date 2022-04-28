@@ -30,12 +30,14 @@ module.exports = {
     payState_create: 1,
     // 已经支付
     payState_pay: 2,
+    // 已经选坐
+    payState_choose: 3,
     // 订单结束
-    payState_end: 3,
+    payState_end: 4,
     // 订单取消
-    payState_cancel: 4,
+    payState_cancel: 5,
     // 全部退款
-    payState_refund: 5,
+    payState_refund: 6,
     // 部分机票退款
-    payState_rebates: 6,
+    payState_rebates: 7,
 }

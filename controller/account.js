@@ -1,9 +1,13 @@
 const db_user = require('../database/d_user')
 const d_air = require('../database/d_air')
+const c_flight = require('./c_flight');
 const handle = require('../until/handle')
 const field = require('../maps/field')
 const codeMap = require('../maps/rcodeMap')
 const {userType} = require("../maps/field");
+const {getUnixTimeStamp} = require("../until/time");
+// 更新订单
+const {reloadOrder,payOrder} = require("./TimeUpdate");
 // 处理账号的注册登录,
 
 async function checkAccount(account,userType= field.userType){
@@ -279,8 +283,144 @@ async function addCar(flightId,account){
 }
 
 
-async function addOrder(account){
+// 创建一个基础订单,未支付
+async function addOrder(account,flightId,travelIds){
+    let flight;
+    if(travelIds.length < 1){throw {rcode:codeMap.notParam,msg:'缺少乘车人'}}
+    // 检查是否有不知名的乘机人
+    for(let i = 0;i<travelIds.length;i++){
+        [err,result] = await handle(db_user.travelInfo(travelIds[0]));
+        if(err)throw err;
+        if(result.length<1){throw {rcode:codeMap.customError,msg:'不在数据表的乘机人'}}
+    }
+    let userId,unixTime = getUnixTimeStamp();
+    // 根据账号查找id
+    let [err,result] = await handle(db_user.findAccountUser(userType,account));
+    if(err)throw err;
+    if(result.length < 1){
+        throw {rcode:codeMap.notFound,msg:'无法找到账户'}
+    }
+    userId = result[0].id;
+    // 查看航班是否已经结束
+    [err,flight] = await handle(c_flight.flightInfo(flightId));
+    if(err)throw err;
+    if((parseInt(flight.pay) + travelIds.length) > parseInt(flight.totalVotes)){
+        throw {rcode:codeMap.customError,msg:'航班机票不足'}
+    }
+    // 添加订单
+    [err,result] = await handle(db_user.addOrder(userId,flightId,travelIds,unixTime));
+    if(err)throw err;
+    await reloadOrder();
+    return result;
 
+}
+
+/**
+ * 支付订单
+ * @param account 账户
+ * @param orderId 订单id
+ * @returns {Promise<boolean>}
+ */
+async function payOrder(account,orderId){
+    let userId,order,flight,travels;
+    order.travelIds = undefined;
+    // 根据账号查找id
+    let [err,result] = await handle(db_user.findAccountUser(userType,account));
+    if(err)throw err;
+    if(result.length < 1){ throw {rcode:codeMap.notFound,msg:'无法找到账户'}}
+    userId = result[0].id;
+    [err,result] = await handle(db_user.userOrderInfo(userId,orderId));
+    if(err)throw err;
+    if(result.length < 1){ throw {rcode:codeMap.notFound,msg:'无法找到相关订单'} }
+    order = result[0];
+    if(order.payState!=field.payState_create){throw {rcode:codeMap.notFound,msg:'无法支付非未支付订单'}}
+    [err,flight] = await handle(c_flight.flightInfo(order.flightId));
+    if(err)throw err;
+    if(flight.flightState!=field.flightState_sail){throw {rcode:codeMap.notFound,msg:'航班已经开始检票或者起飞,无法支付'}}
+    // 创建对应的机票
+    travels=order.travelIds.split(',');
+    for(let i = 0;i<travels.length;i++){
+        // 添加乘机人
+        [err,result] = await handle(db_user.addTick(order.id,travels[i]));
+        if(err){
+            // 删除对应订单的乘机人
+            [err,result] = await handle(db_user.clearTick(order.id));
+        }
+    }
+    await payOrder(orderId);
+    return true;
+}
+
+/**
+ * 选坐
+ * @param tickId 机票id
+ * @param row 排
+ * @param col 行
+ * @returns {Promise<void>}
+ */
+async function chooseSit(tickId,row,col){
+    let tick;
+    // 获取对应的航班信息
+    let [err,result] = await handle(db_user.tickInfo(tickId))
+    if(err)throw err;
+    if(result.length < 1){throw {rcode:codeMap.notFound,msg:'无法找到机票'}}
+
+}
+
+/**
+ * 订单详情
+ * @param account
+ * @param orderId
+ * @returns {Promise<void>}
+ */
+async function orderInfo(account,orderId){
+    let userId,order,travels;
+    // 根据账号查找id
+    let [err,result] = await handle(db_user.findAccountUser(userType,account));
+    if(err)throw err;
+    if(result.length < 1){
+        throw {rcode:codeMap.notFound,msg:'无法找到账户'}
+    }
+    userId = result[0].id;
+    [err,result] = await handle(db_user.userOrderInfo(userId,orderId));
+    if(err)throw err;
+    if(result.length < 1){ throw {rcode:codeMap.notFound,msg:'无法找到相关订单'} }
+    order = result[0];
+    // 获取乘车人信息
+    travels=order.travelIds.split(',');
+    order.travels = travels.map(async travelId=>{
+        [err,result] = await handle(db_user.travelInfo(travelId));
+        if(err) console.log('获取乘车人信息失败'); throw  err;
+        if(result.length < 1){ throw {rcode:codeMap.notFound,msg:'无法找到乘车人'} }
+        // 查找对应车票信息
+        [err,result] = await handle(db_user.orderTick(order.id,travelId));
+        return {
+            id:result[0].id,
+            name:result[0].name,
+        }
+    });
+    return order;
+}
+
+
+async function changeOrderTravel(account,orderId,travelIds){
+    let userId,order,travels;
+    // 根据账号查找id
+    let [err,result] = await handle(db_user.findAccountUser(userType,account));
+    if(err)throw err;
+    if(result.length < 1){
+        throw {rcode:codeMap.notFound,msg:'无法找到账户'}
+    }
+    [err,result] = await handle(db_user.userOrderInfo(userId,orderId));
+    if(err)throw err;
+    if(result.length < 1){ throw {rcode:codeMap.notFound,msg:'无法找到相关订单'} }
+    order = result[0];
+    // 只允许未选坐前进行修改乘客信息
+    if(order.payState == field.payState_create || order.payState == field.payState_pay){
+
+    }else{
+        throw {rcode:codeMap.notFound,msg:'当前订单不允许修改乘车人'}
+    }
 }
 
 module.exports = {
@@ -297,6 +437,7 @@ module.exports = {
     addTravel,
     travels,
     travelInfo,
-    updateTravel
+    updateTravel,
+    addOrder
 }
 

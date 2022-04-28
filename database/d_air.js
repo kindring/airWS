@@ -25,6 +25,14 @@ function airs(state){
     return mysql.pq(sql,values);
 }
 
+
+function airInfo(airId){
+    let sql=``,values=[];
+    sql = `select * from air where id = ?`;
+    values.push(airId)
+    sql+=';';
+    return mysql.pq(sql,values);
+}
 /**
  * 新增飞机
  * @param airCode
@@ -361,5 +369,6 @@ module.exports = {
     flightOrder,
     airs,
     addAir,
+    airInfo,
     updateAir
 }

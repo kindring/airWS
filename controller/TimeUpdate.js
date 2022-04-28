@@ -17,26 +17,7 @@ function tick (t,fn){
     },t)
 }
 
-
-async function check(){
-    if(payLock){
-        return;
-    }
-    let nowUnix = getUnixTimeStamp();
-    for (let i = 0; i < orders.length; i++) {
-        let order = orders[i];
-        if(!order){
-            break;
-        }
-        if(nowUnix>order.endTime){
-            let [err,result] = await handle(db_user.changeOrder(order.id,{payState:payState_cancel}));
-            if(err){console.log(err)}
-            console.log(`订单${order.id},超时过期`);
-        }
-    }
-}
-
-async function main(){
+async function loadOrder(){
     let [err,result] = await handle(db_user.waitPayOrder());
     if(err){
         console.log('获取用户数据失败')
@@ -48,12 +29,35 @@ async function main(){
             endTime: parseInt(order.createTime) + expire
         }
     });
-    tick(1000,check);
 }
 
-main();
+async function check(){
+    if(payLock){
+        return;
+    }
+    let nowUnix = getUnixTimeStamp();
+    orders = orders.filter(val=>val);
+    for (let i = 0; i < orders.length; i++) {
+        let order = orders[i];
+        if(!order){
+            break;
+        }
+        if(nowUnix>order.endTime){
+            let [err,result] = await handle(db_user.changeOrder(order.id,{payState:payState_cancel}));
+            if(err){console.log(err)}else{
+                console.log(`订单${order.id},超时过期`);
+                orders[i] = null;
+            }
 
-console.log('检测订单');
+        }
+    }
+}
+
+async function main(){
+    console.log('检测订单');
+    tick(1000,check);
+}
+main();
 
 // 用户支付订单
 async function payOrder(orderId){
@@ -64,17 +68,18 @@ async function payOrder(orderId){
     if(ind!=-1){orders[ind] = null}
     orders = orders.filter(val=>val);
     payLock=false;
+    return result;
 }
 
-async function addOrder(orderId,createTime){
-    orders.push({
-        id: orderId,
-        endTime: parseInt(createTime) + expire
-    })
+
+async function reloadOrder(){
+    payLock=true;
+    await loadOrder();
+    payLock=false;
 }
 
 module.exports = {
+    reloadOrder,
     payOrder,
-    addOrder,
 }
 

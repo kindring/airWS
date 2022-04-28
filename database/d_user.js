@@ -237,9 +237,54 @@ function userOrder(userId,payState){
     return mysql.pq(sql,values);
 }
 
+// 获取
+function orderTick(orderId){
+    let sql=``,values=[];
+    sql+=`select * from airTicket where orderId = ?`;
+    values.push(orderId);
+    return mysql.pq(sql,values);
+}
+
+/**
+ * 获取机票信息
+ * @param tickId 机票id
+ * @returns {Promise | Promise<unknown>}
+ */
+function tickInfo(tickId){
+    let sql=``,values=[];
+    sql+=`select * from airTicket where id = ?`;
+    values.push(tickId);
+    return mysql.pq(sql,values);
+}
+
+/**
+ * 添加选票
+ * @param orderId
+ * @param travelId
+ * @returns {Promise | Promise<unknown>}
+ */
+function addTick(orderId,travelId){
+    let sql=``,values=[];
+    sql+=`insert into order(orderId,travelId) values(?,?)`;
+    values.push(orderId,travelId);
+    return mysql.pq(sql,values);
+}
+
+/**
+ * 清除指定订单的所有票
+ * @param orderId
+ * @returns {Promise | Promise<unknown>}
+ */
+function clearTick(orderId){
+    let sql=``,values=[];
+    sql+=`delete from order where orderId = ?`;
+    values.push(orderId);
+    return mysql.pq(sql,values);
+}
+
 function addOrder(userId,flightId,travelIds,createTime){
     let sql=``,values=[];
-    sql+=`insert into order(userId,flightId,ticketNum,travelIds,createTime)`;
+    sql+=`insert into order(userId,flightId,ticketNum,travelIds,createTime) values(?,?,?,?,?)`;
     values.push(userId,flightId);
     values.push(travelIds.length);
     values.push(travelIds.join(','));
@@ -296,6 +341,19 @@ function changeOrder(orderId,params){
     return mysql.pq(sql,values);
 }
 
+/**
+ * 获取指定用户的对应订单详细信息
+ * @param userId
+ * @param orderId
+ * @returns {Promise | Promise<unknown>}
+ */
+function userOrderInfo(userId,orderId){
+    let sql=``,values=[];
+    sql+=`select * from orders where userId = ? and orderId = ?`
+    values.push(userId,orderId);
+    return mysql.pq(sql,values);
+}
+
 module.exports =  {
     register,
     login,
@@ -317,5 +375,10 @@ module.exports =  {
     changeTravel,
     waitPayOrder,
     changeOrder,
-    payOrder
+    payOrder,
+    addOrder,
+    userOrderInfo,
+    addTick,
+    clearTick,
+    tickInfo
 }

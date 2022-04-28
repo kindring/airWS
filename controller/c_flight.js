@@ -57,11 +57,28 @@ async function flightInfo(flightId){
             refundTick =  val.refundTick.split(',').length;
         }
         return acc+(ticketNum - refundTick)
-    },0)
+    },0);
     flight.pay = sold;
     return flight;
 }
 
+/**
+ * 获取航班的座位信息
+ * @param flightId
+ * @returns {Promise<void>}
+ */
+async function seatInfo(flightId){
+    let err,flight,air,seat = {};
+    [err,flight] = await handle(flightInfo(flightId));
+    if(err){throw err}
+    // 获取飞机信息
+    [err,air] = await handle(airInfo(flight.airId));
+    // 显示座位情况
+    seat.row = air.row;
+    seat.col = air.col;
+    // 显示已经选坐的
+
+}
 async function searchFlights(state,options,page,limie){
     console.log(options);
     let searchItems = {
@@ -80,6 +97,8 @@ async function searchFlights(state,options,page,limie){
     console.log(result)
     return result;
 }
+
+
 
 /**
  * 新增航班
@@ -232,6 +251,14 @@ async function airs(state){
     let [err,result] = await handle(db_air.airs(state));
     if(err){throw err}
     return result;
+}
+
+
+async function airInfo(airId){
+    let [err,result] = await handle(db_air.airInfo(airId));
+    if(err){throw err}
+    if(result.length<1){throw {rcode:codeMap.notFound,msg:'无法找到对应飞机'}}
+    return result[0];
 }
 
 async function updateAir(airId,updateParam){
