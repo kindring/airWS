@@ -2,7 +2,7 @@
 const {getUnixTimeStamp} = require('../until/time')
 const db_user = require('../database/d_user')
 const handle = require("../until/handle");
-const {payState_cancel} = require("../maps/field");
+const {payState_cancel,payState_timeout} = require("../maps/field");
 let orders = [];
 let payLock = false;
 // 订单超过15分钟的自动过期
@@ -35,6 +35,7 @@ async function check(){
     if(payLock){
         return;
     }
+    // console.log(orders)
     let nowUnix = getUnixTimeStamp();
     orders = orders.filter(val=>val);
     for (let i = 0; i < orders.length; i++) {
@@ -42,8 +43,12 @@ async function check(){
         if(!order){
             break;
         }
-        if(nowUnix>order.endTime){
-            let [err,result] = await handle(db_user.changeOrder(order.id,{payState:payState_cancel}));
+        console.log(`订单${order.id} 当前时间${nowUnix} - 结束时间${order.endTime} 剩余 ${nowUnix-order.endTime}秒`)
+        // console.log(nowUnix);
+        // console.log(order.endTime);
+        // console.log(nowUnix > order.endTime);
+        if(nowUnix > order.endTime){
+            let [err,result] = await handle(db_user.changeOrder(order.id,{payState:payState_timeout}));
             if(err){console.log(err)}else{
                 console.log(`订单${order.id},超时过期`);
                 orders[i] = null;
@@ -55,20 +60,18 @@ async function check(){
 
 async function main(){
     console.log('检测订单');
+    await loadOrder();
     tick(1000,check);
 }
 main();
 
 // 用户支付订单
-async function payOrder(orderId){
+function payOrderItem(orderId){
     payLock=true;
-    let [err,result] = await handle(db_user.payOrder(orderId));
-    if(err){payLock=false;console.log(err);throw err}
     let ind = orders.findIndex(val=>val.id==orderId);
-    if(ind!=-1){orders[ind] = null}
+    if(ind != -1){orders[ind] = null}
     orders = orders.filter(val=>val);
     payLock=false;
-    return result;
 }
 
 
@@ -80,6 +83,6 @@ async function reloadOrder(){
 
 module.exports = {
     reloadOrder,
-    payOrder,
+    payOrderItem,
 }
 

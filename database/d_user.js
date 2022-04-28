@@ -131,6 +131,7 @@ function addTravel(userId,name,card,phone,defaultState){
     let values = [userId,name,card,phone,defaultState];
     return mysql.pq(sql,values);
 }
+
 // 获取乘机人
 function travels(userId){
     let sql = `select * from travel where userId = ? and \`delete\` = ?`;
@@ -144,6 +145,7 @@ function findUserTravel(userId,flightId){
     let values = [userId,flightId];
     return mysql.pq(sql,values);
 }
+
 /**
  * 修改指定用户的所有状态
  * @param userId
@@ -212,8 +214,13 @@ function removeCar(carId){
     return mysql.pq(sql,values);
 }
 
-
-function userOrder(userId,payState){
+/**
+ * 用户的所有订单
+ * @param userId
+ * @param orderType
+ * @returns {Promise | Promise<unknown>}
+ */
+function userOrder(userId,orderType = fields.orderType_all){
     let sql=``,values=[];
     sql+=`
         select 
@@ -226,19 +233,36 @@ function userOrder(userId,payState){
         LEFT JOIN (select * from flight ) as f on f.id = o.flightId
         LEFT JOIN (select * from air ) as air on air.id = f.airId
         LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity
-        LEFT JOIN (select id,cityName from area ) as tar on tar.id = f.targetCity;
+        LEFT JOIN (select id,cityName from area ) as tar on tar.id = f.targetCity
         where userId = ?
        `
     values.push(userId);
-    if (payState){
+
+    // 刚创建
+    if (orderType === fields.orderType_waitPay){
         sql+=` and payState = ?`;
-        values.push(payState);
+        values.push(fields.payState_create);
+    }
+    // 已经支付,全部值机,部分值机
+    if (orderType === fields.orderType_pay){
+        sql+=` and (payState = ? or payState = ? or payState = ?)`;
+        values.push(fields.payState_pay,fields.payState_choose,fields.payState_rebates);
+    }
+    // 已经取消
+    if (orderType === fields.orderType_cancel){
+        sql+=` and (payState = ? or payState = ? or payState = ?)`;
+        values.push(fields.payState_cancel,fields.payState_timeout,fields.payState_refund);
+    }
+    // 已经完成
+    if (orderType === fields.orderType_end){
+        sql+=` and payState = ?`;
+        values.push(fields.payState_end);
     }
     return mysql.pq(sql,values);
 }
 
 // 获取
-function orderTick(orderId){
+function orderTicks(orderId){
     let sql=``,values=[];
     sql+=`select * from airTicket where orderId = ?`;
     values.push(orderId);
@@ -258,6 +282,59 @@ function tickInfo(tickId){
 }
 
 /**
+ * 某个机票进行值机
+ * @param tickId
+ * @param row
+ * @param col
+ * @returns {Promise | Promise<unknown>}
+ */
+function tickChooseToSel(tickId,row,col){
+    let sql=``,values=[];
+    sql+=`update airTicket set \`row\` = ? , \`col\` = ? , \`tickState\` = ? where id =?`;
+    values.push(row,col,fields.tickState_seat,tickId);
+    return mysql.pq(sql,values);
+}
+
+/**
+ * 获取航班已经选择的座位列表
+ * @param flightId
+ * @returns {Promise | Promise<unknown>}
+ */
+function flightTickSeat(flightId){
+    let sql=``,values=[];
+    sql+=`select t.* from airTicket as t ,orders as o
+            where t.orderId = o.id and o.flightId = ? and t.tickState = ?`;
+    values.push(flightId,fields.tickState_seat)
+    return mysql.pq(sql,values);
+}
+
+function findTickRowCol(flightId,row,col){
+    let sql=``,values=[];
+    sql+=`select t.* from airTicket as t ,orders as o
+            where t.orderId = o.id and o.flightId = ? and t.row = ? and t.col = ? and t.tickState = ?`;
+    values.push(flightId,row,col,fields.tickState_seat)
+    return mysql.pq(sql,values);
+}
+
+function tickSearch(params){
+    let sql=``,values=[];
+    let fields = Object.keys(params);
+    fields = fields.filter(field=>params[field])
+    sql+=`select * from airTicket`;
+    if(fields.length>=1){sql+=' where' }
+    for(let field of fields) {
+        // console.log(`${field} : ${searchItems[field]}`)
+        if (!params[field]) {
+            continue;
+        }
+        if(values.length>0){sql+='and'}
+        sql+=` \`${field}\` = ?`
+        values.push(params[field])
+    }
+    sql+=';';
+    return mysql.pq(sql,values);
+}
+/**
  * 添加选票
  * @param orderId
  * @param travelId
@@ -265,7 +342,7 @@ function tickInfo(tickId){
  */
 function addTick(orderId,travelId){
     let sql=``,values=[];
-    sql+=`insert into order(orderId,travelId) values(?,?)`;
+    sql+=`insert into airTicket(orderId,travelId) values(?,?)`;
     values.push(orderId,travelId);
     return mysql.pq(sql,values);
 }
@@ -277,14 +354,25 @@ function addTick(orderId,travelId){
  */
 function clearTick(orderId){
     let sql=``,values=[];
-    sql+=`delete from order where orderId = ?`;
+    sql+=`delete from orders where orderId = ?`;
     values.push(orderId);
     return mysql.pq(sql,values);
 }
 
 function addOrder(userId,flightId,travelIds,createTime){
     let sql=``,values=[];
-    sql+=`insert into order(userId,flightId,ticketNum,travelIds,createTime) values(?,?,?,?,?)`;
+    sql+=`insert into orders(userId,flightId,ticketNum,travelIds,createTime) values(?,?,?,?,?)`;
+    values.push(userId,flightId);
+    values.push(travelIds.length);
+    values.push(travelIds.join(','));
+    values.push(createTime);
+    return mysql.pq(sql,values);
+}
+
+function findOrder(userId,flightId,travelIds,createTime){
+    let sql=``,values=[];
+    sql+=`select * from orders where userId = ? and flightId = ? and ticketNum = ? and travelIds = ? and createTime = ?`
+    // sql+=`insert into orders(userId,flightId,ticketNum,travelIds,createTime) values(?,?,?,?,?)`;
     values.push(userId,flightId);
     values.push(travelIds.length);
     values.push(travelIds.join(','));
@@ -373,12 +461,19 @@ module.exports =  {
     travelInfo,
     changeAllTravelState,
     changeTravel,
+    userOrder,
     waitPayOrder,
     changeOrder,
     payOrder,
     addOrder,
     userOrderInfo,
     addTick,
+    findOrder,
+    orderTicks,
+    findTickRowCol,
     clearTick,
-    tickInfo
+    tickInfo,
+    tickSearch,
+    flightTickSeat,
+    tickChooseToSel
 }

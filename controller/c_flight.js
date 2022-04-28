@@ -1,6 +1,7 @@
 // 管理航班
 const db_air = require('../database/d_air')
 const db_area = require('../database/d_area')
+const db_user = require('../database/d_user')
 const handle = require('../until/handle')
 const field = require('../maps/field')
 const codeMap = require('../maps/rcodeMap')
@@ -68,7 +69,7 @@ async function flightInfo(flightId){
  * @returns {Promise<void>}
  */
 async function seatInfo(flightId){
-    let err,flight,air,seat = {};
+    let err,result,flight,air,seat = {};
     [err,flight] = await handle(flightInfo(flightId));
     if(err){throw err}
     // 获取飞机信息
@@ -77,8 +78,18 @@ async function seatInfo(flightId){
     seat.row = air.row;
     seat.col = air.col;
     // 获取已经选坐的列表
-
+    [err,result] = await handle(db_user.flightTickSeat(flightId));
+    seat.selecteds = result.map(val=>{
+        return {
+            id:val.id,
+            row: val.row,
+            col: val.col,
+        }
+    })
 }
+
+
+
 async function searchFlights(state,options,page,limie){
     console.log(options);
     let searchItems = {
@@ -282,5 +293,6 @@ module.exports = {
     searchFlights,
     addAir,
     airs,
-    updateAir
+    updateAir,
+    seatInfo
 }

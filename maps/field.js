@@ -30,7 +30,7 @@ module.exports = {
     payState_create: 1,
     // 已经支付
     payState_pay: 2,
-    // 已经选坐
+    // 已经全部值机
     payState_choose: 3,
     // 订单结束
     payState_end: 4,
@@ -40,4 +40,24 @@ module.exports = {
     payState_refund: 6,
     // 部分机票退款
     payState_rebates: 7,
+    // 超时取消
+    payState_timeout: 8,
+    // 机票创建
+    tickState_create: 1,
+    // 已经值机
+    tickState_seat: 2,
+    // 行程结束
+    tickState_wait: 3,
+    // 机票已经退款
+    tickState_refund: 4,
+    // 全部订单
+    orderType_all:'all',
+    // 等待支付
+    orderType_waitPay:'waitPay',
+    // 已经支付订单
+    orderType_pay:'pay',
+    // 已经结束订单
+    orderType_end:'end',
+    // 已经取消订单
+    orderType_cancel:'cancel',
 }

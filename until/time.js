@@ -4,7 +4,7 @@
  * @returns {number}
  */
 function getUnixTimeStamp(date = new Date()){
-    return date.getTime() / 1000;
+    return parseInt(date.getTime() / 1000);
 }
 
 

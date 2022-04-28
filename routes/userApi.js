@@ -294,4 +294,63 @@ router.get('/travels',
         }
     })
 
+
+router.post(
+    '/order/add',
+    checkLogin(fields.userType),
+    checkParams({
+            post:{
+                flightId:{required:true},
+                travelIds:{required:true},
+            }
+        }),
+    async (req,res)=>{
+        try{
+            let results = await c_user.addOrder(
+                req.session[progress.userSessionField],
+                req.body.flightId,
+                req.body.travelIds,
+            );
+            res.json({
+                rcode: code.ok,
+                data: results,
+                total: results.length
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+    }
+    )
+
+router.get(
+    '/orders',
+    checkLogin(fields.userType),
+    async (req,res)=>{
+        try{
+            let results = await c_user.orders(
+                req.session[progress.userSessionField],
+                req.query.type,
+            );
+            res.json({
+                rcode: code.ok,
+                data: results,
+                total: results.length
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+    }
+)
 module.exports = router;

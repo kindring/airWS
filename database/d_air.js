@@ -151,10 +151,6 @@ function flightOrder(flightId){
     return mysql.pq(sql,values);
 }
 
-
-
-
-
 /**
  * 航班具体信息
  * @param flightId
@@ -175,25 +171,9 @@ function flightInfo(flightId){
 }
 
 /**
- * 获取航班票数
- * @param flightId
- * @returns {Promise<unknown>}
- */
-function flightTicks(flightId){
-    let sql=``,values=[];
-    sql=`select ff.*,count(t.flightId = ? or null) as pay
-            from 
-            (select totalVotes from flight where id = ?) as ff,
-            airTickets as t 
-            where t.payState != '1' and t.payState != '4'`;
-    values.push(flightId,flightId);
-    return mysql.pq(sql,values);
-}
-
-/**
  * 添加航班
  * @param flightName 航班名
- * @param airCode 飞机代码
+ * @param airId 飞机id
  * @param originalPrice 原始价格
  * @param currentPrice 当前价格
  * @param sailingTime 起飞时间
@@ -356,10 +336,11 @@ function wicketFlights(num = 5){
     return mysql.pq(sql,values);
 }
 
+
+
 module.exports = {
     flightSearch,
     addFlight,
-    flightTicks,
     updateFlight,
     flightList,
     flightInfo,
