@@ -76,7 +76,7 @@ async function seatInfo(flightId){
     // 显示座位情况
     seat.row = air.row;
     seat.col = air.col;
-    // 显示已经选坐的
+    // 获取已经选坐的列表
 
 }
 async function searchFlights(state,options,page,limie){
