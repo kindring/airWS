@@ -72,6 +72,7 @@ function payOrderItem(orderId){
     if(ind != -1){orders[ind] = null}
     orders = orders.filter(val=>val);
     payLock=false;
+
 }
 
 

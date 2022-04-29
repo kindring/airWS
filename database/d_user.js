@@ -226,6 +226,7 @@ function userOrder(userId,orderType = fields.orderType_all){
         select 
         o.*,air.airCode,
         f.sailingTime,f.langdinTime,f.flightState,f.flightName,
+        f.currentPrice,
         dep.cityname as departureCityName,
         tar.cityname as targetCityName
         from 
@@ -261,10 +262,14 @@ function userOrder(userId,orderType = fields.orderType_all){
     return mysql.pq(sql,values);
 }
 
-// 获取
+/**
+ * 获取订单机票数量
+ * @param orderId
+ * @returns {Promise | Promise<unknown>}
+ */
 function orderTicks(orderId){
     let sql=``,values=[];
-    sql+=`select * from airTicket where orderId = ?`;
+    sql+=`select t.*,p.name from airTicket as t LEFT JOIN (select id,name from travel ) as p on p.id = t.travelId where t.orderId = ?`;
     values.push(orderId);
     return mysql.pq(sql,values);
 }
@@ -383,12 +388,14 @@ function findOrder(userId,flightId,travelIds,createTime){
 /**
  * 用户支付订单
  * @param orderId
+ * @param unitPrice 机票单价
+ * @param payPrice 订单总价格
  * @returns {Promise | Promise<unknown>}
  */
-function payOrder(orderId){
+function payOrder(orderId,unitPrice,payPrice){
     let sql=``,values=[];
-    sql+=`update orders set payState = ? where id = ?`
-    values.push(fields.payState_pay,orderId);
+    sql+=`update orders set payState = ?,unitPrice = ?,payPrice= ? where id = ?`
+    values.push(fields.payState_pay,unitPrice,payPrice,orderId);
     return mysql.pq(sql,values);
 }
 
@@ -437,9 +444,26 @@ function changeOrder(orderId,params){
  */
 function userOrderInfo(userId,orderId){
     let sql=``,values=[];
-    sql+=`select * from orders where userId = ? and id = ?`
+    // sql+=`select * from orders as o , flight as  where userId = ? and id = ?`
+    sql+=`select 
+        o.*,air.airCode,
+        f.sailingTime,f.langdinTime,f.flightState,f.flightName,
+        f.currentPrice,
+        dep.cityname as departureCityName,
+        tar.cityname as targetCityName
+        from 
+        orders as o 
+        LEFT JOIN (select * from flight ) as f on f.id = o.flightId
+        LEFT JOIN (select * from air ) as air on air.id = f.airId
+        LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity
+        LEFT JOIN (select id,cityName from area ) as tar on tar.id = f.targetCity
+        where userId = ? and o.id = ?`
     values.push(userId,orderId);
     return mysql.pq(sql,values);
+}
+
+function orderTick(){
+
 }
 
 module.exports =  {

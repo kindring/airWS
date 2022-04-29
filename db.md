@@ -81,8 +81,8 @@
 | payTime | date | null | null | 支付时间 |
 | travelIds | varchar |  |  | 乘机人列表 |
 | refundTick | varchar | | | 退款的机票id | 
-| payPrice | floor | n | 0-9999 | 订单价格 |
-
+| payPrice | floor(10,2) | n | 0-9999 | 订单价格 |
+| unitPrice | floor(10,2) | n | 0-9999 | 机票单价 | 
 
 ## 机票表 airTicket (需要选坐,多机票订单不允许)
 | 字段       | 类型      | 默认值 | 可选值 | 备注                  |

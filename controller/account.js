@@ -375,9 +375,11 @@ async function payOrder(account,passwd,orderId){
             [err,result] = await handle(db_user.clearTick(order.id));
         }
     }
-    [err,result] = await handle(db_user.payOrder(orderId));
+    let unitPrice = parseFloat(flight.currentPrice);
+    let payPrice = parseFloat(flight.currentPrice) * travels.length;
+    [err,result] = await handle(db_user.payOrder(orderId,unitPrice,payPrice));
     if(err){console.log(err);throw err}
-    payOrderItem();
+    await reloadOrder();
     return result;
 }
 
@@ -461,7 +463,7 @@ async function refundTick(account,tickId){
  * @returns {Promise<void>}
  */
 async function orderInfo(account,orderId){
-    let userId,order,travels;
+    let userId,order,travels,ticks,tmpTravels=[];
     // 根据账号查找id
     let [err,result] = await handle(db_user.findAccountUser(userType,account));
     if(err)throw err;
@@ -473,19 +475,22 @@ async function orderInfo(account,orderId){
     if(err)throw err;
     if(result.length < 1){ throw {rcode:codeMap.notFound,msg:'无法找到相关订单'} }
     order = result[0];
+    // 获取所有车票信息,只有在已经支付后才有
+    [err,ticks] = await handle(db_user.orderTicks(orderId));
+    order.ticks = ticks
     // 获取乘车人信息
     travels=order.travelIds.split(',');
-    order.travels = travels.map(async travelId=>{
-        [err,result] = await handle(db_user.travelInfo(travelId));
+    for (let i = 0; i < travels.length ; i++) {
+        [err,result] = await handle(db_user.travelInfo(travels[i]));
         if(err) {console.log('获取乘车人信息失败'); throw  err}
         if(result.length < 1){ throw {rcode:codeMap.notFound,msg:'无法找到乘车人'} }
-        // 查找对应车票信息
-        [err,result] = await handle(db_user.orderTick(order.id,travelId));
-        return {
+        console.log(result);
+        tmpTravels.push({
             id:result[0].id,
             name:result[0].name,
-        }
-    });
+        })
+    }
+    order.travels = tmpTravels;
     return order;
 }
 
@@ -535,6 +540,7 @@ module.exports = {
     addOrder,
     chooseSit,
     payOrder,
+    orderInfo,
     changeOrderTravel
 }
 
