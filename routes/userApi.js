@@ -328,6 +328,39 @@ router.post(
     }
     )
 
+router.post(
+    '/order/pay',
+    checkLogin(fields.userType),
+    checkParams({
+        post:{
+            orderId:{required:true},
+            passwd:{required:true},
+        }
+    }),
+    async (req,res)=>{
+        try{
+            let results = await c_user.payOrder(
+                req.session[progress.userSessionField],
+                req.body.passwd,
+                req.body.orderId,
+            );
+            res.json({
+                rcode: code.ok,
+                data: results,
+                total: results.length
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+    }
+)
+
 router.get(
     '/orders',
     checkLogin(fields.userType),

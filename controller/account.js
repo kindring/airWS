@@ -31,7 +31,7 @@ async function login(userType = field.userType,account,passwd){
     if (result.length < 1 ) {throw {rcode:codeMap.notFound,msg:'账号或者密码错误'}}
     // 账号被冻结
     if (result[0].state == field.userFreezeState ){throw {rcode:codeMap.permissionDenied,msg:'账号被冻结'}}
-    return result[0].account;
+    return result[0];
 }
 
 /**
@@ -346,14 +346,15 @@ async function addOrder(account,flightId,travelIds){
 /**
  * 支付订单
  * @param account 账户
+ * @param passwd
  * @param orderId 订单id
  * @returns {Promise<boolean>}
  */
-async function payOrder(account,orderId){
+async function payOrder(account,passwd,orderId){
     let userId,order,flight,travels;
-    order.travelIds = undefined;
+    // order.travelIds = undefined;
     // 根据账号查找id
-    let [err,result] = await handle(info(userType,account));
+    let [err,result] = await handle(login(userType,account,passwd));
     if(err)throw err;
     userId = result.id;
     [err,result] = await handle(db_user.userOrderInfo(userId,orderId));

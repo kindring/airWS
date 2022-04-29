@@ -387,7 +387,7 @@ function findOrder(userId,flightId,travelIds,createTime){
  */
 function payOrder(orderId){
     let sql=``,values=[];
-    sql+=`update orders set payState = ? where id = orderId`
+    sql+=`update orders set payState = ? where id = ?`
     values.push(fields.payState_pay,orderId);
     return mysql.pq(sql,values);
 }
@@ -437,7 +437,7 @@ function changeOrder(orderId,params){
  */
 function userOrderInfo(userId,orderId){
     let sql=``,values=[];
-    sql+=`select * from orders where userId = ? and orderId = ?`
+    sql+=`select * from orders where userId = ? and id = ?`
     values.push(userId,orderId);
     return mysql.pq(sql,values);
 }

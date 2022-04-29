@@ -38,10 +38,10 @@ router.post('/login',
             if (req.body.captcha.toLowerCase() != req.session.captcha) return res.json({...result, msg: `验证码错误,captcha error` });
             let results = await c_user.login(field.adminType,req.body.account,req.body.passwd);
             console.log(results);
-            req.session[progress.adminSessionField] = results;
+            req.session[progress.adminSessionField] = results.account;
             res.json({
                 rcode: code.ok,
-                data: results
+                data: results.account
             })
         }catch (error) {
             if (error.rcode !== code.customError) {
