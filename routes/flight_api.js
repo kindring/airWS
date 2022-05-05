@@ -201,6 +201,7 @@ router.post('/sells',
             });
         }
     })
+
 router.get('/sellist',
     async (req,res)=>{
         try{
@@ -251,6 +252,30 @@ router.get('/airs',
     async (req,res)=>{
         try{
             let results = await c_flight.airs(req.query.state);
+            res.json({
+                rcode: code.ok,
+                data: results
+            })
+        }catch (error) {
+            if (error.rcode !== code.customError) {
+                console.log(error);
+            }
+            res.json({
+                rcode: error.rcode || code.serverError,
+                msg: error.msg || error.message
+            });
+        }
+    })
+
+router.get('/seat',
+    paramsCheck({
+        get:{
+            flightId:{required:true},
+        }
+    }),
+    async (req,res)=>{
+        try{
+            let results = await c_flight.seatInfo(req.query.flightId);
             res.json({
                 rcode: code.ok,
                 data: results

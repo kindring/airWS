@@ -74,11 +74,13 @@ async function seatInfo(flightId){
     if(err){throw err}
     // 获取飞机信息
     [err,air] = await handle(airInfo(flight.airId));
+    if(err){throw err}
     // 显示座位情况
     seat.row = air.row;
     seat.col = air.col;
     // 获取已经选坐的列表
     [err,result] = await handle(db_user.flightTickSeat(flightId));
+    if(err){throw err}
     seat.selecteds = result.map(val=>{
         return {
             id:val.id,
@@ -86,6 +88,7 @@ async function seatInfo(flightId){
             col: val.col,
         }
     })
+    return result;
 }
 
 
