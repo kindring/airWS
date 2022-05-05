@@ -88,7 +88,7 @@ async function seatInfo(flightId){
             col: val.col,
         }
     })
-    return result;
+    return seat;
 }
 
 
