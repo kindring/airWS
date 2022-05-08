@@ -99,7 +99,7 @@ async function searchFlights(state,options,page,limie){
         departureCity:options.departureCity,
         targetCity:options.targetCity,
         startTime:options.startTime?(options.startTime-0)/1000:((new Date().getTime()-0)/1000),
-        endTime:options.endTime?(options.endTime-0)/1000:((new Date().getTime()-0)/1000)+offsetTime,
+        endTime:options.endTime,
         flightState: state,
         routeType: options.routeType,
         isLate: options.isLate,
@@ -285,6 +285,7 @@ async function updateAir(airId,updateParam){
     if(err){throw err}
     return result;
 }
+
 
 module.exports = {
     searchFlight,

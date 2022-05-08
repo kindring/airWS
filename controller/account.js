@@ -343,6 +343,36 @@ async function addOrder(account,flightId,travelIds){
     return result[0]||{};
 }
 
+// 退票订单
+async function refundOrder(account,orderId){
+    let userId,order,ticks,isRefund = false;
+    // order.travelIds = undefined;
+    // 根据账号查找id
+    let [err,result] = await handle(info(userType,account));
+    if(err)throw err;
+    userId = result.id;
+    [err,result] = await handle(db_user.userOrderInfo(userId,orderId));
+    if(err)throw err;
+    if(result.length < 1){ throw {rcode:codeMap.notFound,msg:'无法找到相关订单'} }
+    order = result[0];
+    // 获取所有车票信息,只有在已经支付后才有
+    [err,ticks] = await handle(db_user.orderTicks(order.id));
+    if(err)throw err;
+    // 判断是否有机票已经退款了
+    for (const tick of ticks) {
+        if(tick.tickState == field.tickState_seat){
+            throw {rcode:codeMap.customError,msg:'该订单部分机票已经值机不允许退票'}
+        }
+    }
+    // 订单设置为退票状态
+    [err,result] = await handle(db_user.changeOrder(orderId, {payState:field.payState_refund}));
+    if(err)throw err;
+    // 退票所有乘客
+    [err,result] = await handle(db_user.refundOrderTick(orderId));
+    if(err)throw err;
+    return result;
+}
+
 /**
  * 支付订单
  * @param account 账户
@@ -405,7 +435,7 @@ async function chooseSit(account,tickId,row,col){
     if(err)throw err;
     if(result.length > 0){throw {rcode:codeMap.dataRepeat,msg:'该位置已经被占用了呢'}}
     // 设置座位
-    [err,result] = await handle(db_user.tickChooseToSel(tickId,row,col))
+    [err,result] = await handle(db_user.tickChooseToSel(tickId,row,col,getUnixTimeStamp()))
     if(err)throw err;
     // 遍历查看订单是否全部选坐完成.全部选坐完成则
     travels=order.travelIds.split(',');
@@ -435,7 +465,12 @@ async function refundTick(account,tickId){
     if(err)throw err;
     if(result.length < 1){throw {rcode:codeMap.notFound,msg:'无法找到机票'}}
     tick = result[0];
+
     if(tick.tickState != field.tickState_create){throw {rcode:codeMap.customError,msg:'该机票不允许退款'}}
+    // 退款订单
+    [err,result] = await handle(db_user.refundTick(tickId))
+    if(err)throw err;
+    // 查看对应的订单状态
     [err,order] = await handle(orderInfo(account,tick.orderId))
     if(err)throw err;
     // 遍历查看订单是否为部分退款
@@ -521,6 +556,8 @@ async function changeOrderTravel(account,orderId,travelIds){
     }
 }
 
+
+
 module.exports = {
     register,
     changePhone,
@@ -541,6 +578,8 @@ module.exports = {
     chooseSit,
     payOrder,
     orderInfo,
+    refundTick,
+    refundOrder,
     changeOrderTravel
 }
 

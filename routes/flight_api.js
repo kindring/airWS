@@ -5,7 +5,7 @@ const checkLogin = require('../middleware/checkLogin');
 const code = require('../maps/rcodeMap')
 const field = require('../maps/field')
 const c_area = require("../controller/c_area");
-
+const progress = require('../maps/progress')
 router.get('/list',async (req,res)=>{
     try{
         let results = await c_flight.flightList();
@@ -290,6 +290,7 @@ router.get('/seat',
             });
         }
     })
+
 
 router.post('/air/add',
     checkLogin(field.adminType),

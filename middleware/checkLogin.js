@@ -26,7 +26,9 @@ function checkLogin(accountType,type = 'json') {
             default:
                 field = progress.userSessionField;
         }
-        if (!req.session[field]) {
+        let tmpAccount = req.session[field];
+        req.session[field] = '';
+        if (!tmpAccount) {
             // 类型
             let resAction;
             switch (type) {
@@ -49,6 +51,7 @@ function checkLogin(accountType,type = 'json') {
             }
             return res[resAction.action](...resAction.params)
         }
+        req.session[field] = tmpAccount;
         next();
     }
 }

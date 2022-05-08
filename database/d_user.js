@@ -291,12 +291,13 @@ function tickInfo(tickId){
  * @param tickId
  * @param row
  * @param col
+ * @param cussTime
  * @returns {Promise | Promise<unknown>}
  */
-function tickChooseToSel(tickId,row,col){
+function tickChooseToSel(tickId,row,col,cussTime){
     let sql=``,values=[];
-    sql+=`update airTicket set \`row\` = ? , \`col\` = ? , \`tickState\` = ? where id =?`;
-    values.push(row,col,fields.tickState_seat,tickId);
+    sql+=`update airTicket set \`row\` = ? , \`col\` = ? ,\`cussTime\`=?, \`tickState\` = ?  where id =?`;
+    values.push(row,col,cussTime,fields.tickState_seat,tickId);
     return mysql.pq(sql,values);
 }
 
@@ -313,6 +314,7 @@ function flightTickSeat(flightId){
     return mysql.pq(sql,values);
 }
 
+// 查看该
 function findTickRowCol(flightId,row,col){
     let sql=``,values=[];
     sql+=`select t.* from airTicket as t ,orders as o
@@ -332,7 +334,7 @@ function tickSearch(params){
         if (!params[field]) {
             continue;
         }
-        if(values.length>0){sql+='and'}
+        if(values.length>0){sql+=' and'}
         sql+=` \`${field}\` = ?`
         values.push(params[field])
     }
@@ -361,6 +363,30 @@ function clearTick(orderId){
     let sql=``,values=[];
     sql+=`delete from orders where orderId = ?`;
     values.push(orderId);
+    return mysql.pq(sql,values);
+}
+
+/**
+ * 退票指定订单的所有票
+ * @param orderId
+ * @returns {Promise | Promise<unknown>}
+ */
+function refundOrderTick(orderId){
+    let sql=``,values=[];
+    sql+=`update airTicket set \`tickState\` = ?  where orderId =?`;
+    values.push(fields.tickState_refund,orderId);
+    return mysql.pq(sql,values);
+}
+
+/**
+ * 退票指定id
+ * @param tickId
+ * @returns {Promise | Promise<unknown>}
+ */
+function refundTick(tickId){
+    let sql=``,values=[];
+    sql+=`update airTicket set \`tickState\` = ?  where id =?`;
+    values.push(fields.tickState_refund,tickId);
     return mysql.pq(sql,values);
 }
 
@@ -499,5 +525,7 @@ module.exports =  {
     tickInfo,
     tickSearch,
     flightTickSeat,
-    tickChooseToSel
+    tickChooseToSel,
+    refundOrderTick,
+    refundTick
 }
