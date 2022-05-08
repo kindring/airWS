@@ -20,6 +20,31 @@ function addRecommend(recommendName,discript,zIndex = 1){
 }
 
 /**
+ * 活动列表
+ * @returns {Promise | Promise<unknown>}
+ */
+function recommendList(){
+    let sql=``,values=[];
+    sql+=`select * from recommendDir`
+    sql += ' order by zIndex desc;'
+    return mysql.pq(sql,values);
+}
+
+
+/**
+ * 获取活动
+ * @param recommendId 活动id
+ * @returns {Promise | Promise<unknown>}
+ */
+function find(recommendId){
+    let sql=``,values=[];
+    sql+=`select * from recommendDir where id = ?`
+    sql += ';'
+    values.push(recommendId)
+    return mysql.pq(sql,values);
+}
+
+/**
  * 搜索活动
  * @param key
  * @param state
@@ -52,7 +77,13 @@ function searchRecommend(key,state){
  */
 function loadFlights(recommendId,isHave){
     let sql=``,values=[];
-    sql+=`select f.*,r.recommendIndex from flight as f , recommendFlight as r  where`
+    sql+=`select r.*,f.flightName,f.currentPrice,f.originalPrice,f.sailingTime,f.langdinTime ,air.airCode,dep.cityname as departureCityName,tar.cityname as targetCityName
+            from
+            recommendFlight as r,
+            flight as f
+            LEFT JOIN (select * from air ) as air on air.id = f.airId
+            LEFT JOIN (select id,cityName from area ) as dep on dep.id = f.departureCity
+            LEFT JOIN (select id,cityName from area ) as tar on tar.id = f.targetCity where`
     if(isHave){
         sql += ` f.id = r.flightId`;
     }else {
@@ -60,7 +91,7 @@ function loadFlights(recommendId,isHave){
     }
     sql += ` and r.recommendId = ?`;
     values.push(recommendId);
-    sql += ';'
+    sql += ' order by r.zIndex desc;'
     return mysql.pq(sql,values);
 }
 
@@ -97,10 +128,36 @@ function deleteFlight(recommendId,flightId){
     return mysql.pq(sql,values);
 }
 
+
+
+
+function updateRecommend(recommendId,params){
+    let sql=`update recommendDir set`,values=[];
+    let fields = Object.keys(params);
+    fields = fields.filter(field=>params[field])
+    if(fields.length<1){
+        throw {rcode:code.notParam}
+    }
+    for(let field of fields) {
+        if (!params[field]) {
+            continue;
+        }
+        if(values.length>0){sql+=','}
+        sql+=` \`${field}\` = ?`
+        values.push(params[field])
+    }
+    sql+=` where id = ?`;
+    values.push(recommendId);
+    return mysql.pq(sql,values);
+}
+
 module.exports = {
+    recommendList,
     addRecommend,
     searchRecommend,
     loadFlights,
     addFlights,
     deleteFlight,
+    updateRecommend,
+    find
 }

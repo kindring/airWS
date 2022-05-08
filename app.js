@@ -11,6 +11,7 @@ const citysRouter = require('./routes/citys');
 const adminRouter = require('./routes/admin');
 const captcha = require('./routes/captcha');
 const flight = require('./routes/flight_api');
+const recommend = require('./routes/recommend_api');
 
 const app = express();
 
@@ -21,9 +22,9 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use('/js', express.static(path.join(__dirname, './public/js')));
-app.use('/js', express.static(path.join(__dirname, './public/img')));
+app.use('/img', express.static(path.join(__dirname, './public/img')));
 app.use('/', express.static(path.join(__dirname, './public')));
-
+app.use('/public', express.static(path.join(__dirname, './public')));
 // 配置session
 app.use(
     session({
@@ -46,6 +47,7 @@ app.use('/admin', adminRouter);
 app.use('/api/city/',citysRouter);
 app.use('/api/captcha', captcha);
 app.use('/api/flight', flight);
+app.use('/api/recommend', recommend);
 
 
 
