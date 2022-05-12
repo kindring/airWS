@@ -12,6 +12,9 @@ const adminRouter = require('./routes/admin');
 const captcha = require('./routes/captcha');
 const flight = require('./routes/flight_api');
 const recommend = require('./routes/recommend_api');
+const fileControl = require('./routes/file_api');
+
+
 
 const app = express();
 
@@ -48,8 +51,7 @@ app.use('/api/city/',citysRouter);
 app.use('/api/captcha', captcha);
 app.use('/api/flight', flight);
 app.use('/api/recommend', recommend);
-
-
+app.use('/api/file',fileControl);
 
 app.listen(serverConfig.port, serverConfig.host, ()=>{
   console.warn(`服务启动 server is running to @http://${serverConfig.host}:${serverConfig.port}`);

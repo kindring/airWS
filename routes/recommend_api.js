@@ -51,7 +51,7 @@ router.post('/recommend/add',
     }),
     async (req,res)=>{
     try{
-        let results = await c_recommend.addRecommend(req.body.recommendName,req.body.descript ,req.body.zIndex);
+        let results = await c_recommend.addRecommend(req.body.recommendName,req.body.descript ,req.body.zIndex,req.body.imgUrl);
         res.json({
             rcode: code.ok,
             data: results

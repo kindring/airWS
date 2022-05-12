@@ -12,8 +12,8 @@ async function list(){
     return result;
 }
 
-async function addRecommend(name,descript,zIndex){
-    let [err,result] = await handle(db_recommend.addRecommend(name,descript,zIndex));
+async function addRecommend(name,descript,zIndex,imgUrl){
+    let [err,result] = await handle(db_recommend.addRecommend(name,descript,zIndex,imgUrl));
     if(err){throw err}
     return result;
 }

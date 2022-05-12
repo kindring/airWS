@@ -8,14 +8,15 @@ const checkArgumentsIsEmpty = require('../until/checkArgumentsIsEmpty')
  * @param recommendName 活动名
  * @param discript 推荐描述
  * @param zIndex 排序
+ * @param imgUrl
  * @returns {Promise | Promise<unknown>}
  */
-function addRecommend(recommendName,discript,zIndex = 1){
+function addRecommend(recommendName,discript,zIndex = 1,imgUrl = 'public/upload/bg_weekend.jpg'){
     let sql=``,values=[];
     sql+=`insert into 
-            recommend (recommendName,discript,zIndex) 
-            values(?,?,?);`
-    values.push(recommendName,discript,zIndex)
+            recommend (recommendName,discript,zIndex,bg) 
+            values(?,?,?,?);`
+    values.push(recommendName,discript,zIndex,imgUrl)
     return mysql.pq(sql,values);
 }
 
