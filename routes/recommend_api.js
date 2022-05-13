@@ -116,6 +116,25 @@ router.post('/flight/add',
             apiErrHandle('修改航班项目', res, error);
         }
     });
+router.post('/flight/delete',
+    checkLogin(field.adminType),
+    paramsCheck({
+        post: {
+            recommendId: {required: true},
+            flightId: {required: true},
+        }
+    }),
+    async (req, res) => {
+        try {
+            let results = await c_recommend.deleteItem(req.body.recommendId, req.body.flightId);
+            res.json({
+                rcode: code.ok,
+                data: results
+            })
+        } catch (error) {
+            apiErrHandle('修改航班项目', res, error);
+        }
+    });
 
 router.post('/add',
     checkLogin(field.adminType),

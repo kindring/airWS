@@ -42,6 +42,11 @@ async function changeRecommend(recommendId,params){
     return result;
 }
 
+async function deleteItem(recommendId,flightId){
+    let [err,result] = await handle(db_recommend.deleteFlight(recommendId,flightId));
+    if(err){throw err}
+    return result;
+}
 /**
  * 修改推就项目信息
  * @param recommendId
@@ -127,6 +132,7 @@ module.exports = {
     list,
     addRecommend,
     addFlight,
+    deleteItem,
     changeRecommend,
     changeRecommendItem,
     homeRecommends,
