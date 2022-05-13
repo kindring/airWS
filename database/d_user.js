@@ -416,12 +416,13 @@ function findOrder(userId,flightId,travelIds,createTime){
  * @param orderId
  * @param unitPrice 机票单价
  * @param payPrice 订单总价格
+ * @param payTime 支付时间
  * @returns {Promise | Promise<unknown>}
  */
-function payOrder(orderId,unitPrice,payPrice){
+function payOrder(orderId,unitPrice,payPrice,payTime){
     let sql=``,values=[];
-    sql+=`update orders set payState = ?,unitPrice = ?,payPrice= ? where id = ?`
-    values.push(fields.payState_pay,unitPrice,payPrice,orderId);
+    sql+=`update orders set payState = ?,unitPrice = ?,payPrice= ?,payTime = ? where id = ?`
+    values.push(fields.payState_pay,unitPrice,payPrice,payTime,orderId);
     return mysql.pq(sql,values);
 }
 
@@ -533,5 +534,6 @@ module.exports =  {
     flightTickSeat,
     tickChooseToSel,
     refundOrderTick,
-    refundTick
+    refundTick,
+    okOrder
 }

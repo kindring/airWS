@@ -23,6 +23,42 @@ router.get('/recommends', async (req, res) => {
         });
     }
 });
+
+router.get('/info',
+    paramsCheck({
+    get: {
+        id: {required: true},
+    }
+}),
+    async (req, res) => {
+    try {
+        let results = await c_recommend.recommendInfo(req.query.id);
+        res.json({
+            rcode: code.ok,
+            data: results
+        })
+    } catch (error) {
+        apiErrHandle('推荐信息', res, error);
+    }
+});
+
+router.get('/nof',
+    paramsCheck({
+        get: {
+            id: {required: true},
+        }
+    }),
+    async (req, res) => {
+        try {
+            let results = await c_recommend.recommendNot(req.query.id);
+            res.json({
+                rcode: code.ok,
+                data: results
+            })
+        } catch (error) {
+            apiErrHandle('推荐信息', res, error);
+        }
+    });
 router.get('/homer', async (req, res) => {
     try {
         let results = await c_recommend.homeRecommends();
@@ -41,6 +77,45 @@ router.get('/homer', async (req, res) => {
     }
 });
 
+router.post('/flight/change',
+    paramsCheck({
+        post: {
+            recommendId: {required: true},
+            flightId: {required: true},
+            params: {required: true},
+        }
+    }),
+    async (req, res) => {
+        try {
+            let results = await c_recommend.changeRecommendItem(req.body.recommendId, req.body.flightId, req.body.params);
+            res.json({
+                rcode: code.ok,
+                data: results
+            })
+        } catch (error) {
+            apiErrHandle('修改航班项目', res, error);
+        }
+    });
+router.post('/flight/add',
+    checkLogin(field.adminType),
+    paramsCheck({
+        post: {
+            recommendId: {required: true},
+            flightId: {required: true},
+            img: {required: true},
+        }
+    }),
+    async (req, res) => {
+        try {
+            let results = await c_recommend.addFlight(req.body.recommendId, req.body.flightId, req.body.img,req.body.zIndex);
+            res.json({
+                rcode: code.ok,
+                data: results
+            })
+        } catch (error) {
+            apiErrHandle('修改航班项目', res, error);
+        }
+    });
 
 router.post('/add',
     checkLogin(field.adminType),
@@ -94,6 +169,26 @@ router.post('/flights',
         }
     });
 
+// changeRecommend
+
+router.post('/change',
+    paramsCheck({
+        post:{
+            id: {required:true},
+            params: {required:true},
+        }
+    }),
+    async (req, res) => {
+    try {
+        let results = await c_recommend.changeRecommend(req.body.id,req.body.params);
+        res.json({
+            rcode: code.ok,
+            data: results
+        })
+    } catch (error) {
+        apiErrHandle('修改推荐', res, error);
+    }
+});
 router.post('/search', async (req, res) => {
     try {
         let results = await c_recommend.list();
@@ -102,7 +197,7 @@ router.post('/search', async (req, res) => {
             data: results
         })
     } catch (error) {
-        apiErrHandle('搜索航班', res, error);
+        apiErrHandle('搜索推荐', res, error);
     }
 });
 

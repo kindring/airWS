@@ -88,7 +88,7 @@ function loadFlights(recommendId,isHave){
     if(isHave){
         sql += ` f.id = r.flightId`;
     }else {
-        sql += ` f.id != r.flightId`;
+        sql += ` f.id != r.flightId and f.flightState = 1`;
     }
     sql += ` and r.recommendId = ?`;
     values.push(recommendId);
@@ -117,6 +117,22 @@ function addFlights(recommendId,flights){
 }
 
 /**
+ * 新增航班到推荐中
+ * @param recommendId
+ * @param flightId
+ * @param img
+ * @param zIndex
+ * @returns {Promise | Promise<unknown>}
+ */
+function addFlight(recommendId,flightId,img,zIndex = 0){
+    let sql=``,values=[];
+    sql+=`insert into recommendFlight (recommendId,flightId,img,zIndex) values(?,?,?,?)`
+    values.push(recommendId,flightId,img,zIndex)
+    sql += ';'
+    return mysql.pq(sql,values);
+}
+
+/**
  * 删除推荐里的指定航班
  * @param recommendId 推荐id
  * @param flightId 航班id
@@ -137,7 +153,7 @@ function updateRecommend(recommendId,params){
     let fields = Object.keys(params);
     fields = fields.filter(field=>params[field])
     if(fields.length<1){
-        throw {rcode:code.notParam}
+        throw {rcode:code.notParam,msg:'db缺少参数'}
     }
     for(let field of fields) {
         if (!params[field]) {
@@ -152,13 +168,44 @@ function updateRecommend(recommendId,params){
     return mysql.pq(sql,values);
 }
 
+/**
+ * 更新活动项
+ * @param recommendId
+ * @param flightId
+ * @param params
+ * @returns {Promise | Promise<unknown>}
+ */
+function updateRecommendItem(recommendId,flightId,params){
+    let sql=`update recommendFlight set`,values=[];
+    let fields = Object.keys(params);
+    fields = fields.filter(field=>params[field])
+    if(fields.length<1){
+        throw {rcode:code.notParam,msg:'db缺少参数'}
+    }
+    console.log(fields)
+    console.log(params)
+    for(let field of fields) {
+        if (!params[field]) {
+            continue;
+        }
+        if(values.length>0){sql+=','}
+        sql+=` \`${field}\` = ?`
+        values.push(params[field])
+    }
+    sql+=` where recommendId = ? and flightId = ?`;
+    values.push(recommendId,flightId);
+    return mysql.pq(sql,values);
+}
+
 module.exports = {
     recommendList,
     addRecommend,
     searchRecommend,
     loadFlights,
     addFlights,
+    addFlight,
     deleteFlight,
     updateRecommend,
+    updateRecommendItem,
     find
 }

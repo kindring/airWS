@@ -407,7 +407,7 @@ async function payOrder(account,passwd,orderId){
     }
     let unitPrice = parseFloat(flight.currentPrice);
     let payPrice = parseFloat(flight.currentPrice) * travels.length;
-    [err,result] = await handle(db_user.payOrder(orderId,unitPrice,payPrice));
+    [err,result] = await handle(db_user.payOrder(orderId,unitPrice,payPrice,getUnixTimeStamp()));
     if(err){console.log(err);throw err}
     await reloadOrder();
     return result;
