@@ -488,8 +488,14 @@ function userOrderInfo(userId,orderId){
     return mysql.pq(sql,values);
 }
 
-function orderTick(){
-
+/**
+ * 指定航班的所有订单完成,部分退款和全部选坐的都
+ * @param flightId
+ */
+function okOrder(flightId){
+    let sql=``,values=[];
+    sql += `update orders set payState = ? where flightId = ? and (payState = ? or chooseNum != 0)`
+    values.push(fields.payState_end,flightId,fields.payState_choose);
 }
 
 module.exports =  {

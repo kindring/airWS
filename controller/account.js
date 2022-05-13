@@ -446,7 +446,11 @@ async function chooseSit(account,tickId,row,col){
     if(err) {throw err}
     // 已经全部值机,订单切换为全部值机的状态
     if(result.length === travels.length){
-        [err,result] = await handle(db_user.changeOrder(order.id,{payState:field.payState_choose}));
+        [err,result] = await handle(db_user.changeOrder(order.id,{payState:field.payState_choose,chooseNum:result.length}));
+        if(err) {throw  err}
+    }else{
+        // 添加已经选坐的乘客数量
+        [err,result] = await handle(db_user.changeOrder(order.id,{chooseNum:result.length}));
         if(err) {throw  err}
     }
     return result;

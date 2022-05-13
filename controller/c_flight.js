@@ -286,6 +286,38 @@ async function updateAir(airId,updateParam){
     return result;
 }
 
+/**
+ * 航班进入下一状态
+ * @param flightId 航班id
+ * @param nextState 下一个状态
+ * @returns {Promise<*>}
+ */
+async function setState(flightId,nextState){
+    let err,flight,result;
+    // 获取航班信息
+     [err,flight] = await handle(flightInfo(flightId));
+    if(err){throw err}
+    if(flight.flightState != (nextState -1)){
+        throw {rcode:codeMap.customError,msg:'不允许跳级修改'}
+    }
+    [err,result] = await handle(db_air.updateFlight(flightId,{
+        flightState:nextState
+    }))
+    if(err){throw err}
+    if(nextState == 2){
+        // 切换为检票,无操作
+        console.log(`航班${flightId},开始检票`);
+    }else if(nextState == 3){
+        // 切换为飞行中,查看是否有订单是未值机的
+        console.log(`航班${flightId},开始飞行`);
+    }else if(nextState == 4){
+        // 切换为订单完成
+        // 查看是否有已经值机的用户
+        [err,result] = await handle(db_user.okOrder(flightId))
+        if(err){throw err}
+    }
+    return result;
+}
 
 module.exports = {
     searchFlight,
@@ -298,5 +330,6 @@ module.exports = {
     addAir,
     airs,
     updateAir,
-    seatInfo
+    seatInfo,
+    setState
 }

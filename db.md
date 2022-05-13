@@ -83,6 +83,7 @@
 | refundTick | varchar | | | 退款的机票id | 
 | payPrice | floor(10,2) | n | 0-9999 | 订单价格 |
 | unitPrice | floor(10,2) | n | 0-9999 | 机票单价 | 
+| chooseNum | int | 0 | n | 已经选坐的数量 |
 
 ## 机票表 airTicket (需要选坐,多机票订单不允许)
 | 字段       | 类型      | 默认值 | 可选值 | 备注                  |
@@ -93,7 +94,7 @@
 | ticketState | char(2) | 1 | 1(已经创建) 2(已经值机) 3(等待飞行) 4(退款) | 机票状态 |
 | line | int | n | 1-24 | 座位排数 |
 | row | int | n | 1-6 | 座位列数 |
-| cussTime | int | n | n | 值机时间 |
+| cussTime | int | n | n | 值机时间 | 
 
 ## 购物车 car
 | 字段       | 类型      | 默认值 | 可选值 | 备注                  |
@@ -116,5 +117,4 @@
 | recommendId | int | pk | n | 推荐id | 
 | flightId | int | pk | n | 航班id |
 | recommendIndex | int | 1 | n | 推荐指数 |
-
 

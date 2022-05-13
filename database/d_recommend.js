@@ -14,7 +14,7 @@ const checkArgumentsIsEmpty = require('../until/checkArgumentsIsEmpty')
 function addRecommend(recommendName,discript,zIndex = 1,imgUrl = 'public/upload/bg_weekend.jpg'){
     let sql=``,values=[];
     sql+=`insert into 
-            recommend (recommendName,discript,zIndex,bg) 
+            recommendDir (recommendName,discript,zIndex,bg) 
             values(?,?,?,?);`
     values.push(recommendName,discript,zIndex,imgUrl)
     return mysql.pq(sql,values);
@@ -39,9 +39,9 @@ function recommendList(){
  */
 function find(recommendId){
     let sql=``,values=[];
-    sql+=`select * from recommendDir where id = ?`
-    sql += ';'
-    values.push(recommendId)
+    sql+=`select * from recommendDir where id = ?`;
+    sql += ';';
+    values.push(recommendId);
     return mysql.pq(sql,values);
 }
 

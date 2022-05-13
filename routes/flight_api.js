@@ -230,9 +230,7 @@ router.post('/state',
     }),
     async (req,res)=>{
         try{
-            let results = await c_flight.updateFlight(req.body.flightId, {
-                flightState:req.body.nextState
-            });
+            let results = await c_flight.setState(req.body.flightId, req.body.nextState);
             res.json({
                 rcode: code.ok,
                 data: results
